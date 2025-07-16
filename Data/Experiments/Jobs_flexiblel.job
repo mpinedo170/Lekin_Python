@@ -1,0 +1,49 @@
+Shop:               Flow
+Job:                J001
+  RGB:                255;184;33
+  Release:            4
+  Due:                0
+  Weight:             1
+  Oper:               W001;1;A
+  Oper:               W002;1;A
+
+Job:                J002
+  RGB:                149;181;188
+  Release:            5
+  Due:                0
+  Weight:             1
+  Oper:               W001;1;A
+  Oper:               W002;1;A
+
+Job:                J003
+  RGB:                95;250;50
+  Release:            5
+  Due:                0
+  Weight:             1
+  Oper:               W001;2;A
+  Oper:               W002;1;A
+
+Job:                J004
+  RGB:                184;3;242
+  Release:            7
+  Due:                0
+  Weight:             1
+  Oper:               W001;4;A
+  Oper:               W002;3;A
+
+Job:                J005
+  RGB:                206;96;119
+  Release:            2
+  Due:                0
+  Weight:             1
+  Oper:               W001;2;A
+  Oper:               W002;5;A
+
+Job:                J006
+  RGB:                53;175;230
+  Release:            7
+  Due:                0
+  Weight:             1
+  Oper:               W001;4;A
+  Oper:               W002;5;A
+

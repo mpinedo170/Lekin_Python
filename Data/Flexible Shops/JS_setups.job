@@ -1,0 +1,54 @@
+Shop:               Job
+Job:                J01
+  Release:            0
+  Due:                5
+  Weight:             4
+  RGB:                26;223;227
+  Oper:               W01;2;B
+  Oper:               W03;1;A
+  Oper:               W04;2;B
+
+Job:                J02
+  Release:            0
+  Due:                5
+  Weight:             4
+  RGB:                191;195;193
+  Oper:               W03;1;A
+  Oper:               W04;2;A
+  Oper:               W01;3;B
+
+Job:                J03
+  Release:            0
+  Due:                10
+  Weight:             2
+  RGB:                255;0;245
+  Oper:               W04;2;B
+  Oper:               W02;1;A
+  Oper:               W03;1;A
+
+Job:                J04
+  Release:            3
+  Due:                9
+  Weight:             1
+  RGB:                240;165;217
+  Oper:               W02;1;B
+  Oper:               W04;2;A
+  Oper:               W03;1;A
+
+Job:                J05
+  Release:            0
+  Due:                12
+  Weight:             5
+  RGB:                214;56;105
+  Oper:               W02;1;A
+  Oper:               W04;2;B
+  Oper:               W01;3;A
+
+Job:                J06
+  Release:            4
+  Due:                16
+  Weight:             2
+  RGB:                195;242;75
+  Oper:               W04;2;A
+  Oper:               W01;3;A
+

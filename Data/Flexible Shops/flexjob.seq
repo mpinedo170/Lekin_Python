@@ -1,0 +1,40 @@
+Schedule:           General SB Routine / Cmax
+  RGB:                92;128;128
+  Time:               1
+  Machine:            W01;W01.01
+    Oper:               J02
+    Oper:               J01
+    Oper:               J04
+    Oper:               J03
+  Machine:            W02;W02.01
+    Oper:               J04
+    Oper:               J01
+  Machine:            W02;W02.02
+    Oper:               J03
+    Oper:               J02
+  Machine:            W03;W03.01
+    Oper:               J02
+    Oper:               J03
+    Oper:               J04
+    Oper:               J01
+
+Schedule:           General SB Routine / sum(wT)
+  RGB:                128;128;92
+  Time:               1
+  Machine:            W01;W01.01
+    Oper:               J02
+    Oper:               J01
+    Oper:               J03
+    Oper:               J04
+  Machine:            W02;W02.01
+    Oper:               J03
+    Oper:               J01
+  Machine:            W02;W02.02
+    Oper:               J02
+    Oper:               J04
+  Machine:            W03;W03.01
+    Oper:               J02
+    Oper:               J03
+    Oper:               J01
+    Oper:               J04
+

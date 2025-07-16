@@ -1,0 +1,9 @@
+Schedule:           FCFS
+  RGB:                142;16;200
+  Time:               1
+  Machine:            W01
+    Oper:               J01
+    Oper:               J02
+    Oper:               J03
+    Oper:               J04
+

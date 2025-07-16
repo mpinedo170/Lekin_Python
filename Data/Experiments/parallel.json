@@ -1,0 +1,67 @@
+{
+  "jobs": [
+    {
+      "job_id": "J001",
+      "release": 7,
+      "due": 0,
+      "weight": 1,
+      "rgb": [149, 100, 244],
+      "operations": [
+        {"workcenter": "Uno", "processing_time": 6, "status": "A"}
+      ]
+    },
+    {
+      "job_id": "J002",
+      "release": 5,
+      "due": 0,
+      "weight": 1,
+      "rgb": [193, 215, 94],
+      "operations": [
+        {"workcenter": "Uno", "processing_time": 4, "status": "A"}
+      ]
+    },
+    {
+      "job_id": "J003",
+      "release": 2,
+      "due": 0,
+      "weight": 1,
+      "rgb": [235, 59, 21],
+      "operations": [
+        {"workcenter": "Uno", "processing_time": 9, "status": "A"}
+      ]
+    },
+    {
+      "job_id": "J004",
+      "release": 6,
+      "due": 0,
+      "weight": 1,
+      "rgb": [23, 231, 201],
+      "operations": [
+        {"workcenter": "Uno", "processing_time": 5, "status": "A"}
+      ]
+    },
+    {
+      "job_id": "J005",
+      "release": 4,
+      "due": 0,
+      "weight": 1,
+      "rgb": [244, 34, 203],
+      "operations": [
+        {"workcenter": "Uno", "processing_time": 3, "status": "A"}
+      ]
+    }
+  ],
+  "workcenters": [
+    {
+      "name": "Uno",
+      "rgb": [26, 147, 14],
+      "release": 0,
+      "status": "A",
+      "machines": [
+        {"name": "Uno.01", "release": 0, "status": "A"},
+        {"name": "Uno.02", "release": 0, "status": "A"},
+        {"name": "Uno.03", "release": 0, "status": "A"}
+      ]
+    }
+  ]
+}

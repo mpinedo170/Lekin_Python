@@ -1,0 +1,49 @@
+Shop:               Flow
+Job:                A
+  RGB:                169;152;122
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;5;A
+  Oper:               Center 2;5;A
+
+Job:                B
+  RGB:                220;23;220
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;4;A
+  Oper:               Center 2;3;A
+
+Job:                C
+  RGB:                78;247;193
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;8;A
+  Oper:               Center 2;9;A
+
+Job:                D
+  RGB:                246;234;89
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;2;A
+  Oper:               Center 2;7;A
+
+Job:                E
+  RGB:                88;136;249
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;6;A
+  Oper:               Center 2;8;A
+
+Job:                F
+  RGB:                224;71;75
+  Release:            0
+  Due:                70
+  Weight:             1
+  Oper:               Center 1;12;A
+  Oper:               Center 2;15;A
+

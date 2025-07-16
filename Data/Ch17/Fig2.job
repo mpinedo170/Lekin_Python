@@ -1,0 +1,59 @@
+Shop:               Job
+Job:                Job 1
+  RGB:                255;255;0
+  Release:            0
+  Due:                18
+  Weight:             1
+  Oper:               W3;10;A
+
+Job:                Job 3
+  RGB:                102;255;132
+  Release:            0
+  Due:                30
+  Weight:             1
+  Oper:               W1;10;A
+  Oper:               W2;10;A
+
+Job:                Job 4
+  RGB:                255;116;255
+  Release:            30
+  Due:                50
+  Weight:             1
+  Oper:               W1;10;A
+
+Job:                Job 6
+  RGB:                68;255;255
+  Release:            0
+  Due:                40
+  Weight:             1
+  Oper:               W3;15;A
+
+Job:                Job 7
+  RGB:                255;118;120
+  Release:            10
+  Due:                50
+  Weight:             1
+  Oper:               W2;10;A
+  Oper:               W3;10;A
+
+Job:                Job 10
+  RGB:                250;198;133
+  Release:            0
+  Due:                10
+  Weight:             1
+  Oper:               W4;10;A
+
+Job:                Bk1
+  RGB:                0;0;79
+  Release:            10
+  Due:                25
+  Weight:             1
+  Oper:               W3;15;A
+
+Job:                Bk2
+  RGB:                77;0;0
+  Release:            40
+  Due:                50
+  Weight:             1
+  Oper:               W2;10;A
+

@@ -1,0 +1,54 @@
+Schedule:           DASH
+  RGB:                191;252;79
+  Time:               4
+  Machine:            Center 1
+    Oper:               D
+    Oper:               E
+    Oper:               C
+    Oper:               F
+    Oper:               A
+    Oper:               B
+  Machine:            Center 2
+    Oper:               D
+    Oper:               E
+    Oper:               C
+    Oper:               F
+    Oper:               A
+    Oper:               B
+
+Schedule:           Shifting Bottleneck / sum(wT)
+  RGB:                132;75;220
+  Time:               1
+  Machine:            Center 1
+    Oper:               D
+    Oper:               B
+    Oper:               A
+    Oper:               E
+    Oper:               C
+    Oper:               F
+  Machine:            Center 2
+    Oper:               D
+    Oper:               B
+    Oper:               A
+    Oper:               E
+    Oper:               C
+    Oper:               F
+
+Schedule:           Local Search / Cmax
+  RGB:                72;28;23
+  Time:               62
+  Machine:            Center 1
+    Oper:               D
+    Oper:               A
+    Oper:               C
+    Oper:               E
+    Oper:               F
+    Oper:               B
+  Machine:            Center 2
+    Oper:               D
+    Oper:               A
+    Oper:               C
+    Oper:               E
+    Oper:               F
+    Oper:               B
+

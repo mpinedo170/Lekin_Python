@@ -1,0 +1,241 @@
+Shop:               Job
+Job:                J01
+  RGB:                246;94;225
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W09;14;A
+  Oper:               W05;75;A
+  Oper:               W04;12;A
+  Oper:               W03;38;A
+  Oper:               W01;76;A
+  Oper:               W06;97;A
+  Oper:               W10;12;A
+  Oper:               W02;29;A
+  Oper:               W08;44;A
+  Oper:               W07;66;A
+
+Job:                J02
+  RGB:                75;245;199
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W06;38;A
+  Oper:               W04;82;A
+  Oper:               W03;85;A
+  Oper:               W05;58;A
+  Oper:               W07;87;A
+  Oper:               W10;89;A
+  Oper:               W01;43;A
+  Oper:               W02;80;A
+  Oper:               W08;69;A
+  Oper:               W09;92;A
+
+Job:                J03
+  RGB:                201;125;25
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W10;5;A
+  Oper:               W02;84;A
+  Oper:               W01;43;A
+  Oper:               W07;48;A
+  Oper:               W05;8;A
+  Oper:               W08;7;A
+  Oper:               W04;41;A
+  Oper:               W06;61;A
+  Oper:               W09;66;A
+  Oper:               W03;14;A
+
+Job:                J04
+  RGB:                167;171;133
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W03;42;A
+  Oper:               W02;8;A
+  Oper:               W01;96;A
+  Oper:               W06;19;A
+  Oper:               W05;59;A
+  Oper:               W08;97;A
+  Oper:               W10;73;A
+  Oper:               W09;43;A
+  Oper:               W04;74;A
+  Oper:               W07;41;A
+
+Job:                J05
+  RGB:                191;214;227
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W07;55;A
+  Oper:               W03;70;A
+  Oper:               W04;75;A
+  Oper:               W09;42;A
+  Oper:               W05;37;A
+  Oper:               W08;23;A
+  Oper:               W02;48;A
+  Oper:               W06;5;A
+  Oper:               W10;38;A
+  Oper:               W01;7;A
+
+Job:                J06
+  RGB:                140;36;233
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W09;9;A
+  Oper:               W03;72;A
+  Oper:               W08;31;A
+  Oper:               W01;79;A
+  Oper:               W06;73;A
+  Oper:               W04;95;A
+  Oper:               W05;25;A
+  Oper:               W07;43;A
+  Oper:               W10;60;A
+  Oper:               W02;56;A
+
+Job:                J07
+  RGB:                148;239;13
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W01;97;A
+  Oper:               W03;64;A
+  Oper:               W04;78;A
+  Oper:               W06;21;A
+  Oper:               W05;94;A
+  Oper:               W10;31;A
+  Oper:               W09;53;A
+  Oper:               W07;16;A
+  Oper:               W08;86;A
+  Oper:               W02;7;A
+
+Job:                J08
+  RGB:                244;186;107
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W04;86;A
+  Oper:               W08;85;A
+  Oper:               W10;63;A
+  Oper:               W01;61;A
+  Oper:               W03;65;A
+  Oper:               W05;30;A
+  Oper:               W06;32;A
+  Oper:               W02;33;A
+  Oper:               W09;44;A
+  Oper:               W07;59;A
+
+Job:                J09
+  RGB:                96;233;135
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W03;44;A
+  Oper:               W04;16;A
+  Oper:               W05;11;A
+  Oper:               W07;45;A
+  Oper:               W02;30;A
+  Oper:               W10;84;A
+  Oper:               W09;93;A
+  Oper:               W01;60;A
+  Oper:               W06;61;A
+  Oper:               W08;90;A
+
+Job:                J10
+  RGB:                21;193;241
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W08;36;A
+  Oper:               W09;31;A
+  Oper:               W05;47;A
+  Oper:               W07;52;A
+  Oper:               W01;32;A
+  Oper:               W06;11;A
+  Oper:               W03;28;A
+  Oper:               W10;35;A
+  Oper:               W04;20;A
+  Oper:               W02;49;A
+
+Job:                J11
+  RGB:                51;137;228
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W09;20;A
+  Oper:               W07;49;A
+  Oper:               W08;74;A
+  Oper:               W05;10;A
+  Oper:               W06;17;A
+  Oper:               W04;34;A
+  Oper:               W01;85;A
+  Oper:               W03;77;A
+  Oper:               W10;68;A
+  Oper:               W02;84;A
+
+Job:                J12
+  RGB:                221;214;43
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W02;85;A
+  Oper:               W06;7;A
+  Oper:               W09;71;A
+  Oper:               W07;59;A
+  Oper:               W05;76;A
+  Oper:               W01;17;A
+  Oper:               W04;29;A
+  Oper:               W03;17;A
+  Oper:               W08;48;A
+  Oper:               W10;13;A
+
+Job:                J13
+  RGB:                250;116;139
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W03;15;A
+  Oper:               W07;87;A
+  Oper:               W08;11;A
+  Oper:               W02;39;A
+  Oper:               W05;39;A
+  Oper:               W09;43;A
+  Oper:               W01;19;A
+  Oper:               W04;32;A
+  Oper:               W10;16;A
+  Oper:               W06;64;A
+
+Job:                J14
+  RGB:                255;39;21
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W07;32;A
+  Oper:               W03;92;A
+  Oper:               W06;33;A
+  Oper:               W09;82;A
+  Oper:               W02;83;A
+  Oper:               W08;57;A
+  Oper:               W10;99;A
+  Oper:               W05;91;A
+  Oper:               W04;99;A
+  Oper:               W01;8;A
+
+Job:                J15
+  RGB:                148;113;192
+  Release:            0
+  Due:                0
+  Weight:             1
+  Oper:               W05;88;A
+  Oper:               W08;7;A
+  Oper:               W09;27;A
+  Oper:               W02;38;A
+  Oper:               W04;91;A
+  Oper:               W03;69;A
+  Oper:               W07;21;A
+  Oper:               W10;62;A
+  Oper:               W06;39;A
+  Oper:               W01;48;A
+

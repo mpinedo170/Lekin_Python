@@ -1,0 +1,18 @@
+Schedule:           EDD
+  RGB:                161;76;132
+  Time:               1
+  Machine:            W1
+    Oper:               Job 3
+    Oper:               Job 4
+  Machine:            W2
+    Oper:               Job 3
+    Oper:               Job 7
+    Oper:               Bk2
+  Machine:            W3
+    Oper:               Job 1
+    Oper:               Bk1
+    Oper:               Job 6
+    Oper:               Job 7
+  Machine:            W4
+    Oper:               Job 10
+

@@ -1,0 +1,89 @@
+Shop:               Flow
+Job:                J01
+  RGB:                188;170;131
+  Release:            4
+  Due:                37
+  Weight:             1
+  Oper:               W01;5;A
+  Oper:               W02;7;A
+  Oper:               W03;2;A
+  Oper:               W04;7;A
+  Oper:               W05;9;A
+
+Job:                J02
+  RGB:                111;216;130
+  Release:            9
+  Due:                34
+  Weight:             1
+  Oper:               W01;7;A
+  Oper:               W02;2;A
+  Oper:               W03;4;A
+  Oper:               W04;7;A
+  Oper:               W05;3;A
+
+Job:                J03
+  RGB:                108;68;242
+  Release:            9
+  Due:                53
+  Weight:             1
+  Oper:               W01;7;A
+  Oper:               W02;8;A
+  Oper:               W03;10;A
+  Oper:               W04;8;A
+  Oper:               W05;7;A
+
+Job:                J04
+  RGB:                139;164;191
+  Release:            6
+  Due:                33
+  Weight:             1
+  Oper:               W01;2;A
+  Oper:               W02;5;A
+  Oper:               W03;9;A
+  Oper:               W04;6;A
+  Oper:               W05;3;A
+
+Job:                J05
+  RGB:                207;110;249
+  Release:            7
+  Due:                25
+  Weight:             1
+  Oper:               W01;2;A
+  Oper:               W02;3;A
+  Oper:               W03;1;A
+  Oper:               W04;8;A
+  Oper:               W05;3;A
+
+Job:                J06
+  RGB:                0;129;255
+  Release:            3
+  Due:                41
+  Weight:             1
+  Oper:               W01;6;A
+  Oper:               W02;3;A
+  Oper:               W03;8;A
+  Oper:               W04;8;A
+  Oper:               W05;10;A
+
+Job:                J07
+  RGB:                207;87;134
+  Release:            6
+  Due:                44
+  Weight:             1
+  Oper:               W01;5;A
+  Oper:               W02;3;A
+  Oper:               W03;7;A
+  Oper:               W04;10;A
+  Oper:               W05;10;A
+
+Job:                J08
+  RGB:                242;23;115
+  Release:            1
+  Due:                38
+  Weight:             1
+  Oper:               W01;5;A
+  Oper:               W02;3;A
+  Oper:               W03;9;A
+  Oper:               W04;9;A
+  Oper:               W05;8;A
+

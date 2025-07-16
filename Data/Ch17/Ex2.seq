@@ -1,0 +1,44 @@
+Schedule:           EDD
+  RGB:                195;61;74
+  Time:               1
+  Machine:            Uno
+    Oper:               C
+    Oper:               A
+    Oper:               E
+    Oper:               B
+    Oper:               D
+    Oper:               F
+
+Schedule:           SPT
+  RGB:                141;236;163
+  Time:               1
+  Machine:            Uno
+    Oper:               A
+    Oper:               C
+    Oper:               E
+    Oper:               B
+    Oper:               D
+    Oper:               F
+
+Schedule:           CR
+  RGB:                91;188;253
+  Time:               1
+  Machine:            Uno
+    Oper:               C
+    Oper:               F
+    Oper:               A
+    Oper:               E
+    Oper:               B
+    Oper:               D
+
+Schedule:           FCFS
+  RGB:                255;109;243
+  Time:               1
+  Machine:            Uno
+    Oper:               A
+    Oper:               B
+    Oper:               C
+    Oper:               D
+    Oper:               E
+    Oper:               F
+

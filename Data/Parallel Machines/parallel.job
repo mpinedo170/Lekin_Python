@@ -1,0 +1,43 @@
+Shop:               Single
+Job:                J01
+  Release:            0
+  Due:                6
+  Weight:             2
+  RGB:                0;255;0
+  Oper:               Uno;1;A
+
+Job:                J02
+  Release:            0
+  Due:                5
+  Weight:             1
+  RGB:                142;78;232
+  Oper:               Uno;2;A
+
+Job:                J03
+  Release:            4
+  Due:                10
+  Weight:             4
+  RGB:                177;16;215
+  Oper:               Uno;3;A
+
+Job:                J04
+  Release:            5
+  Due:                9
+  Weight:             4
+  RGB:                175;232;3
+  Oper:               Uno;3;A
+
+Job:                J05
+  Release:            5
+  Due:                9
+  Weight:             1
+  RGB:                81;221;80
+  Oper:               Uno;6;A
+
+Job:                J06
+  Release:            2
+  Due:                11
+  Weight:             2
+  RGB:                239;103;172
+  Oper:               Uno;5;A
+

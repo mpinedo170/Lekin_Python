@@ -35,3 +35,48 @@ class Schedule:
             time=data['time'],
             machines=machines
         )
+
+    def display_machine_details(self):
+        print("Schedule type:", self.schedule_type)
+        print("Total time:", self.time)
+        for ms in self.machines:
+            print(f"{ms.machine}: {ms.operations}")
+
+    def display_job_details(self, system):
+        print("\nJob start-end times per machine:")
+        for ms in self.machines:
+            print(f"\n{ms.machine}:")
+            time_marker = 0
+            for job_id in ms.operations:
+                job = next(j for j in system.jobs if j.job_id == job_id)
+                duration = job.operations[0].processing_time
+                print(f"  {job_id}: start={time_marker}, end={time_marker + duration}")
+                time_marker += duration
+
+    def plot_gantt_chart(self, system):
+        import matplotlib.pyplot as plt
+
+        fig, ax = plt.subplots(figsize=(10, 4))
+        colors = {job.job_id: f"C{i}" for i, job in enumerate(system.jobs)}
+
+        yticks = []
+        yticklabels = []
+
+        for i, ms in enumerate(self.machines):
+            y = i
+            yticks.append(y)
+            yticklabels.append(ms.machine)
+            time_marker = 0
+            for job_id in ms.operations:
+                job = next(j for j in system.jobs if j.job_id == job_id)
+                duration = job.operations[0].processing_time
+                ax.barh(y, duration, left=time_marker, color=colors.get(job_id, 'gray'), edgecolor='black')
+                ax.text(time_marker + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
+                time_marker += duration
+
+        ax.set_yticks(yticks)
+        ax.set_yticklabels(yticklabels)
+        ax.set_xlabel("Time")
+        ax.set_title("Gantt Chart - FCFS Example 2")
+        plt.tight_layout()
+        plt.show()

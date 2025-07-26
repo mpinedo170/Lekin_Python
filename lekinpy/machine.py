@@ -9,6 +9,8 @@ class Machine:
     def __repr__(self):
         return f"Machine({self.name}, {self.release}, {self.status})"
 
+# speed of the machine is not included in this class
+
     @staticmethod
     def from_dict(data):
         return Machine(

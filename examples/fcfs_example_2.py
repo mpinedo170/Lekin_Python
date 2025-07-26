@@ -32,50 +32,14 @@ for job in jobs:
     system.add_job(job)
 
 # 4. Run FCFS algorithm
+
 fcfs = FCFSAlgorithm()
 schedule = fcfs.schedule(system)
 system.set_schedule(schedule)
 
-# 5. Print schedule
-print("Schedule type:", schedule.schedule_type)
-print("Total time:", schedule.time)
-for ms in schedule.machines:
-    print(f"{ms.machine}: {ms.operations}")
+# 5. Print schedule and job details using new methods
+schedule.display_machine_details()
+schedule.display_job_details(system)
 
-# 5.1. Print job timings per machine:
-print("\nJob start-end times per machine:")
-for ms in schedule.machines:
-    print(f"\n{ms.machine}:")
-    time_marker = 0
-    for job_id in ms.operations:
-        job = next(j for j in system.jobs if j.job_id == job_id)
-        duration = job.operations[0].processing_time
-        print(f"  {job_id}: start={time_marker}, end={time_marker + duration}")
-        time_marker += duration
-
-# 6. Plot Gantt chart
-fig, ax = plt.subplots(figsize=(10, 4))
-colors = {job.job_id: f"C{i}" for i, job in enumerate(system.jobs)}
-
-yticks = []
-yticklabels = []
-
-for i, ms in enumerate(schedule.machines):
-    y = i
-    yticks.append(y)
-    yticklabels.append(ms.machine)
-    time_marker = 0
-    for job_id in ms.operations:
-        job = next(j for j in system.jobs if j.job_id == job_id)
-        duration = job.operations[0].processing_time
-        ax.barh(y, duration, left=time_marker, color=colors.get(job_id, 'gray'), edgecolor='black')
-        ax.text(time_marker + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
-        print(f"{ms.machine} - {job_id}: start={time_marker}, end={time_marker + duration}")
-        time_marker += duration
-
-ax.set_yticks(yticks)
-ax.set_yticklabels(yticklabels)
-ax.set_xlabel("Time")
-ax.set_title("Gantt Chart - FCFS Example 2")
-plt.tight_layout()
-plt.show()
+# 6. Plot Gantt chart using new method
+schedule.plot_gantt_chart(system)

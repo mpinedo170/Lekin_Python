@@ -26,6 +26,8 @@ class Job:
     def __repr__(self):
         return (f"Job({self.job_id}, {self.release}, {self.due}, "
                 f"{self.weight}, {self.rgb}, {self.operations})")
+    
+    # route should be a part of the job, but not included in this class
 
     @staticmethod
     def from_dict(data):

@@ -1,0 +1,86 @@
+{
+  "jobs": [
+    {
+      "job_id": "J1",
+      "release": 0,
+      "due": 20,
+      "weight": 1,
+      "rgb": [
+        255,
+        0,
+        0
+      ],
+      "operations": [
+        {
+          "workcenter": "Assembly",
+          "processing_time": 5,
+          "status": "A"
+        }
+      ]
+    },
+    {
+      "job_id": "J2",
+      "release": 1,
+      "due": 20,
+      "weight": 1,
+      "rgb": [
+        0,
+        255,
+        0
+      ],
+      "operations": [
+        {
+          "workcenter": "Packaging",
+          "processing_time": 3,
+          "status": "A"
+        }
+      ]
+    }
+  ],
+  "workcenters": [
+    {
+      "name": "Assembly",
+      "release": 0,
+      "status": "A",
+      "rgb": [
+        200,
+        150,
+        100
+      ],
+      "machines": [
+        {
+          "name": "A1",
+          "release": 0,
+          "status": "A"
+        },
+        {
+          "name": "A2",
+          "release": 0,
+          "status": "A"
+        }
+      ]
+    },
+    {
+      "name": "Packaging",
+      "release": 0,
+      "status": "A",
+      "rgb": [
+        100,
+        200,
+        150
+      ],
+      "machines": [
+        {
+          "name": "P1",
+          "release": 0,
+          "status": "A"
+        },
+        {
+          "name": "P2",
+          "release": 0,
+          "status": "A"
+        }
+      ]
+    }
+  ]
+}

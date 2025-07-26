@@ -43,15 +43,31 @@ class Schedule:
             print(f"{ms.machine}: {ms.operations}")
 
     def display_job_details(self, system):
-        print("\nJob start-end times per machine:")
+        print("\nDetailed Job Schedule:")
+        print(f"{'ID':<6} {'Wght':<5} {'Rls':<4} {'Due':<4} {'Pr.tm.':<7} {'Stat.':<6} {'Bgn':<4} {'End':<4} {'T':<4} {'wT':<4}")
+        job_timings = {}
+
+        # Collect timings per job from the schedule
         for ms in self.machines:
-            print(f"\n{ms.machine}:")
             time_marker = 0
             for job_id in ms.operations:
                 job = next(j for j in system.jobs if j.job_id == job_id)
                 duration = job.operations[0].processing_time
-                print(f"  {job_id}: start={time_marker}, end={time_marker + duration}")
+                job_timings[job_id] = (time_marker, time_marker + duration)
                 time_marker += duration
+
+        for job in system.jobs:
+            job_id = job.job_id
+            weight = job.weight
+            release = job.release
+            due = job.due
+            duration = job.operations[0].processing_time
+            status = job.operations[0].status
+            bgn, end = job_timings.get(job_id, (None, None))
+            if bgn is not None:
+                T = end - release
+                wT = T * weight
+                print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
 
     def plot_gantt_chart(self, system):
         import matplotlib.pyplot as plt
@@ -80,3 +96,58 @@ class Schedule:
         ax.set_title("Gantt Chart - FCFS Example 2")
         plt.tight_layout()
         plt.show()
+
+    def display_sequence(self, system):
+        print("\nJob Sequence per Machine:")
+        print(f"{'Mch/Job':<8} {'Setup':<6} {'Start':<6} {'Stop':<6} {'Pr.tm.':<6}")
+        for ms in self.machines:
+            print(f"{ms.machine:<8}")
+            time_marker = 0
+            for job_id in ms.operations:
+                job = next(j for j in system.jobs if j.job_id == job_id)
+                pr_tm = job.operations[0].processing_time
+                setup = 0  # assuming 0 setup time
+                start = time_marker
+                stop = start + pr_tm
+                print(f"  {job_id:<6} {setup:<6} {start:<6} {stop:<6} {pr_tm:<6}")
+                time_marker = stop
+
+    def display_summary(self, system):
+        C_max = max(
+            end for ms in self.machines for job_id in ms.operations
+            for job in system.jobs if job.job_id == job_id
+            for end in [sum(op.processing_time for op in job.operations)]
+        )
+
+        total_time = self.time
+        total_jobs = len(system.jobs)
+        U = total_jobs  # All jobs assumed completed
+        T_sum = 0
+        wT_sum = 0
+
+        for job in system.jobs:
+            start_time, end_time = None, None
+            for ms in self.machines:
+                if job.job_id in ms.operations:
+                    idx = ms.operations.index(job.job_id)
+                    time_marker = sum(
+                        next(j for j in system.jobs if j.job_id == ms.operations[i]).operations[0].processing_time
+                        for i in range(idx)
+                    )
+                    start_time = time_marker
+                    end_time = time_marker + job.operations[0].processing_time
+                    break
+            if start_time is not None:
+                T = end_time - job.release
+                T_sum += T
+                wT_sum += T * job.weight
+
+        print("\nSummary:")
+        print(f"{'Time':<10}{1}")
+        print(f"{'C_max':<10}{C_max}")
+        print(f"{'T_max':<10}{C_max}")
+        print(f"{'ΣU_j':<10}{U}")
+        print(f"{'ΣC_j':<10}{C_max}")
+        print(f"{'ΣT_j':<10}{T_sum}")
+        print(f"{'ΣwC_j':<10}{C_max}")
+        print(f"{'ΣwT_j':<10}{wT_sum}")

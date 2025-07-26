@@ -164,6 +164,45 @@ def save_schedule_to_seq(schedule, filepath):
                 f.write(f"    Oper:               {job_id}\n")
 
 
+# ------------------- Export Functions -------------------
+def export_jobs_to_jobfile(system, filepath):
+    with open(filepath, 'w') as f:
+        f.write("Shop:               Exported\n")
+        for job in system.jobs:
+            f.write(f"Job:                {job.job_id}\n")
+            f.write(f"  RGB:                {';'.join(map(str, job.rgb))}\n")
+            f.write(f"  Release:            {job.release}\n")
+            f.write(f"  Due:                {job.due}\n")
+            f.write(f"  Weight:             {job.weight}\n")
+            for op in job.operations:
+                f.write(f"  Oper:               {op.workcenter};{op.processing_time};{op.status}\n")
+            f.write("\n")
+
+
+def export_workcenters_to_mchfile(system, filepath):
+    with open(filepath, 'w') as f:
+        f.write("Exported:\n")
+        for wc in system.workcenters:
+            f.write(f"Workcenter:         {wc.name}\n")
+            f.write(f"  RGB:                {';'.join(map(str, wc.rgb))}\n")
+            f.write(f"  Release:            {wc.release}\n")
+            f.write(f"  Status:             {wc.status}\n")
+            for m in wc.machines:
+                f.write(f"Machine:            {m.name}\n")
+                f.write(f"    Release:            {m.release}\n")
+                f.write(f"    Status:             {m.status}\n")
+            f.write("\n")
+
+
+def export_system_to_json(system, filepath):
+    system_dict = {
+        "jobs": [job.to_dict() for job in system.jobs],
+        "workcenters": [wc.to_dict() for wc in system.workcenters]
+    }
+    with open(filepath, 'w') as f:
+        json.dump(system_dict, f, indent=2)
+
+
 # def parse_mch_file(filepath):
 #     workcenters = []
 #     with open(filepath) as f:

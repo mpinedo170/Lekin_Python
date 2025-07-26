@@ -6,8 +6,8 @@ from lekinpy.system import System
 from lekinpy.job import Job, Operation
 import json
 # Load .job and .mch files
-jobs = parse_job_file("Data/Single Machine/single.job")
-workcenters = parse_mch_file("Data/Single Machine/single.mch")
+jobs = parse_job_file("Data/Single Machine/exported_test.job")
+workcenters = parse_mch_file("Data/Single Machine/exported_test.mch")
 
 print("\nJobs loaded:", len(jobs))
 print("Jobs:", jobs)

@@ -1,0 +1,15 @@
+Shop:               Exported
+Job:                J1
+  RGB:                255;0;0
+  Release:            0
+  Due:                20
+  Weight:             1
+  Oper:               Assembly;5;A
+
+Job:                J2
+  RGB:                0;255;0
+  Release:            1
+  Due:                20
+  Weight:             1
+  Oper:               Packaging;3;A
+

@@ -41,5 +41,12 @@ system.set_schedule(schedule)
 schedule.display_machine_details()
 schedule.display_job_details(system)
 
+# 7. Display sequence
+schedule.display_sequence(system)
+
+# 8. Display summary
+schedule.display_summary(system)
+
 # 6. Plot Gantt chart using new method
 schedule.plot_gantt_chart(system)
+

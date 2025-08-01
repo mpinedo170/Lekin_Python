@@ -14,16 +14,14 @@ class MachineSchedule:
         }
 
 class Schedule:
-    def __init__(self, schedule_type: str, rgb: Tuple[int, int, int], time: int, machines: List[MachineSchedule]) -> None:
+    def __init__(self, schedule_type: str, time: int, machines: List[MachineSchedule]) -> None:
         self.schedule_type: str = schedule_type
-        self.rgb: Tuple[int, int, int] = rgb
         self.time: int = time
         self.machines: List[MachineSchedule] = machines
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'schedule_type': self.schedule_type,
-            'rgb': self.rgb,
             'time': self.time,
             'machines': [m.to_dict() for m in self.machines]
         }
@@ -33,7 +31,6 @@ class Schedule:
         machines = [MachineSchedule(**m) for m in data.get('machines', [])]
         return Schedule(
             schedule_type=data['schedule_type'],
-            rgb=tuple(data['rgb']),
             time=data['time'],
             machines=machines
         )
@@ -70,7 +67,8 @@ class Schedule:
             status = job.operations[0].status
             bgn, end = job_timings.get(job_id, (None, None))
             if bgn is not None:
-                T = end # - release
+                T = end - due # If this is negative this is zero
+                T = max(T, 0)  # Ensure T is not negative
                 wT = T * weight
                 print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
 
@@ -121,31 +119,27 @@ class Schedule:
                 time_marker = stop
 
     def display_summary(self, system: Any) -> None:
-        start_times = []
-        end_times = []
-        T_list = []
-        wT_list = []
-        C_list = []
-        wC_list = []
+        start_times, end_times, T_list, wT_list, C_list, wC_list, U_list = [], [], [], [], [], [], []
 
         for job in system.jobs:
             start = getattr(job, 'start_time', None)
             end = getattr(job, 'end_time', None)
-            release = job.release
+            due = job.due
             weight = job.weight
             if start is not None and end is not None:
-                T = end - release
+                T = max(0, end - due)
                 T_list.append(T)
                 wT_list.append(T * weight)
                 C_list.append(end)
                 wC_list.append(end * weight)
                 start_times.append(start)
                 end_times.append(end)
+                U_list.append(1 if T > 0 else 0)
 
         time_start = min(start_times) if start_times else 0
         C_max = max(end_times) if end_times else 0
         T_max = max(T_list) if T_list else 0
-        U = len(system.jobs)
+        U = sum(U_list)
         sum_Cj = sum(C_list)
         sum_Tj = sum(T_list)
         sum_wCj = sum(wC_list)

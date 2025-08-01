@@ -3,6 +3,7 @@ from lekinpy.system import System
 from lekinpy.job import Job, Operation
 from lekinpy.machine import Machine, Workcenter
 from lekinpy.algorithms.fcfs import FCFSAlgorithm
+from lekinpy.algorithms.wspt import WSPT
 import matplotlib.pyplot as plt 
 
 jobs = parse_job_file("Data/Experiments/Jobs_fcfs_parallel.job")
@@ -18,10 +19,12 @@ for wc in workcenter:
     system.add_workcenter(wc)
 
 fcfs = FCFSAlgorithm()
+# wspt = WSPT()
+# schedule = fcfs.schedule(system)
 schedule = fcfs.schedule(system)
 system.set_schedule(schedule)
 
 schedule.display_machine_details()
 schedule.display_job_details(system)  
 schedule.display_summary(system) 
-schedule.plot_gantt_chart(system) 
+schedule.plot_gantt_chart(system)

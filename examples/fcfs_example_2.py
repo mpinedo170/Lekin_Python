@@ -1,7 +1,9 @@
+from lekinpy.io import export_jobs_to_jobfile, export_workcenters_to_mchfile
 from lekinpy.system import System
 from lekinpy.job import Job, Operation
 from lekinpy.machine import Machine, Workcenter
 from lekinpy.algorithms.fcfs import FCFSAlgorithm
+from lekinpy.algorithms.fcfs_cpp import FCFS_CPPStyle_Algorithm
 import matplotlib.pyplot as plt
 
 # 1. Create system
@@ -34,6 +36,7 @@ for job in jobs:
 # 4. Run FCFS algorithm
 
 fcfs = FCFSAlgorithm()
+#fcfs = FCFS_CPPStyle_Algorithm()
 schedule = fcfs.schedule(system)
 system.set_schedule(schedule)
 
@@ -47,6 +50,8 @@ schedule.display_sequence(system)
 # 8. Display summary
 schedule.display_summary(system)
 
+export_jobs_to_jobfile(system, "Data/Exported/exported_test.job")
+export_workcenters_to_mchfile(system, "Data/Exported/exported_test.mch")
+
 # 6. Plot Gantt chart using new method
 schedule.plot_gantt_chart(system)
-

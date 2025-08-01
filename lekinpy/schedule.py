@@ -1,10 +1,12 @@
-class MachineSchedule:
-    def __init__(self, workcenter, machine, operations):
-        self.workcenter = workcenter
-        self.machine = machine
-        self.operations = operations  # List of job_ids
+from typing import Any, Dict, List, Optional, Tuple
 
-    def to_dict(self):
+class MachineSchedule:
+    def __init__(self, workcenter: Optional[str], machine: str, operations: List[str]) -> None:
+        self.workcenter: Optional[str] = workcenter
+        self.machine: str = machine
+        self.operations: List[str] = operations  # List of job_ids
+
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'workcenter': self.workcenter,
             'machine': self.machine,
@@ -12,13 +14,13 @@ class MachineSchedule:
         }
 
 class Schedule:
-    def __init__(self, schedule_type, rgb, time, machines):
-        self.schedule_type = schedule_type
-        self.rgb = rgb
-        self.time = time
-        self.machines = machines  # List of MachineSchedule
+    def __init__(self, schedule_type: str, rgb: Tuple[int, int, int], time: int, machines: List[MachineSchedule]) -> None:
+        self.schedule_type: str = schedule_type
+        self.rgb: Tuple[int, int, int] = rgb
+        self.time: int = time
+        self.machines: List[MachineSchedule] = machines
 
-    def to_dict(self):
+    def to_dict(self) -> Dict[str, Any]:
         return {
             'schedule_type': self.schedule_type,
             'rgb': self.rgb,
@@ -27,34 +29,37 @@ class Schedule:
         }
 
     @staticmethod
-    def from_dict(data):
+    def from_dict(data: Dict[str, Any]) -> 'Schedule':
         machines = [MachineSchedule(**m) for m in data.get('machines', [])]
         return Schedule(
             schedule_type=data['schedule_type'],
-            rgb=data['rgb'],
+            rgb=tuple(data['rgb']),
             time=data['time'],
             machines=machines
         )
 
-    def display_machine_details(self):
+    def display_machine_details(self) -> None:
         print("Schedule type:", self.schedule_type)
         print("Total time:", self.time)
         for ms in self.machines:
             print(f"{ms.machine}: {ms.operations}")
 
-    def display_job_details(self, system):
+    def display_job_details(self, system: Any) -> None:
         print("\nDetailed Job Schedule:")
         print(f"{'ID':<6} {'Wght':<5} {'Rls':<4} {'Due':<4} {'Pr.tm.':<7} {'Stat.':<6} {'Bgn':<4} {'End':<4} {'T':<4} {'wT':<4}")
-        job_timings = {}
+        job_timings: Dict[str, Tuple[int, int]] = {}
 
-        # Collect timings per job from the schedule
+        # Collect timings per job from the schedule, respecting job release time
         for ms in self.machines:
-            time_marker = 0
+            machine_time = 0  # assuming scheduling starts at time 1
             for job_id in ms.operations:
                 job = next(j for j in system.jobs if j.job_id == job_id)
+                release = job.release
                 duration = job.operations[0].processing_time
-                job_timings[job_id] = (time_marker, time_marker + duration)
-                time_marker += duration
+                start_time = max(release, machine_time)
+                end_time = start_time + duration
+                job_timings[job_id] = (start_time, end_time)
+                machine_time = end_time
 
         for job in system.jobs:
             job_id = job.job_id
@@ -65,30 +70,33 @@ class Schedule:
             status = job.operations[0].status
             bgn, end = job_timings.get(job_id, (None, None))
             if bgn is not None:
-                T = end - release
+                T = end # - release
                 wT = T * weight
                 print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
 
-    def plot_gantt_chart(self, system):
+    def plot_gantt_chart(self, system: Any) -> None:
         import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(figsize=(10, 4))
         colors = {job.job_id: f"C{i}" for i, job in enumerate(system.jobs)}
 
-        yticks = []
-        yticklabels = []
+        yticks: List[int] = []
+        yticklabels: List[str] = []
 
         for i, ms in enumerate(self.machines):
             y = i
             yticks.append(y)
             yticklabels.append(ms.machine)
-            time_marker = 0
+            machine_time = 0
             for job_id in ms.operations:
                 job = next(j for j in system.jobs if j.job_id == job_id)
+                release = job.release
                 duration = job.operations[0].processing_time
-                ax.barh(y, duration, left=time_marker, color=colors.get(job_id, 'gray'), edgecolor='black')
-                ax.text(time_marker + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
-                time_marker += duration
+                start_time = max(release, machine_time)
+                end_time = start_time + duration
+                ax.barh(y, duration, left=start_time, color=colors.get(job_id, 'gray'), edgecolor='black')
+                ax.text(start_time + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
+                machine_time = end_time
 
         ax.set_yticks(yticks)
         ax.set_yticklabels(yticklabels)
@@ -97,7 +105,7 @@ class Schedule:
         plt.tight_layout()
         plt.show()
 
-    def display_sequence(self, system):
+    def display_sequence(self, system: Any) -> None:
         print("\nJob Sequence per Machine:")
         print(f"{'Mch/Job':<8} {'Setup':<6} {'Start':<6} {'Stop':<6} {'Pr.tm.':<6}")
         for ms in self.machines:
@@ -112,42 +120,43 @@ class Schedule:
                 print(f"  {job_id:<6} {setup:<6} {start:<6} {stop:<6} {pr_tm:<6}")
                 time_marker = stop
 
-    def display_summary(self, system):
-        C_max = max(
-            end for ms in self.machines for job_id in ms.operations
-            for job in system.jobs if job.job_id == job_id
-            for end in [sum(op.processing_time for op in job.operations)]
-        )
-
-        total_time = self.time
-        total_jobs = len(system.jobs)
-        U = total_jobs  # All jobs assumed completed
-        T_sum = 0
-        wT_sum = 0
+    def display_summary(self, system: Any) -> None:
+        start_times = []
+        end_times = []
+        T_list = []
+        wT_list = []
+        C_list = []
+        wC_list = []
 
         for job in system.jobs:
-            start_time, end_time = None, None
-            for ms in self.machines:
-                if job.job_id in ms.operations:
-                    idx = ms.operations.index(job.job_id)
-                    time_marker = sum(
-                        next(j for j in system.jobs if j.job_id == ms.operations[i]).operations[0].processing_time
-                        for i in range(idx)
-                    )
-                    start_time = time_marker
-                    end_time = time_marker + job.operations[0].processing_time
-                    break
-            if start_time is not None:
-                T = end_time - job.release
-                T_sum += T
-                wT_sum += T * job.weight
+            start = getattr(job, 'start_time', None)
+            end = getattr(job, 'end_time', None)
+            release = job.release
+            weight = job.weight
+            if start is not None and end is not None:
+                T = end - release
+                T_list.append(T)
+                wT_list.append(T * weight)
+                C_list.append(end)
+                wC_list.append(end * weight)
+                start_times.append(start)
+                end_times.append(end)
+
+        time_start = min(start_times) if start_times else 0
+        C_max = max(end_times) if end_times else 0
+        T_max = max(T_list) if T_list else 0
+        U = len(system.jobs)
+        sum_Cj = sum(C_list)
+        sum_Tj = sum(T_list)
+        sum_wCj = sum(wC_list)
+        sum_wTj = sum(wT_list)
 
         print("\nSummary:")
-        print(f"{'Time':<10}{1}")
+        print(f"{'Time':<10}{time_start}")
         print(f"{'C_max':<10}{C_max}")
-        print(f"{'T_max':<10}{C_max}")
+        print(f"{'T_max':<10}{T_max}")
         print(f"{'ΣU_j':<10}{U}")
-        print(f"{'ΣC_j':<10}{C_max}")
-        print(f"{'ΣT_j':<10}{T_sum}")
-        print(f"{'ΣwC_j':<10}{C_max}")
-        print(f"{'ΣwT_j':<10}{wT_sum}")
+        print(f"{'ΣC_j':<10}{sum_Cj}")
+        print(f"{'ΣT_j':<10}{sum_Tj}")
+        print(f"{'ΣwC_j':<10}{sum_wCj}")
+        print(f"{'ΣwT_j':<10}{sum_wTj}")

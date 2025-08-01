@@ -2,24 +2,26 @@ import json
 from .job import Job, Operation
 from .machine import Workcenter, Machine
 
-def load_jobs_from_json(filepath):
+from typing import Any, List, Dict
+
+def load_jobs_from_json(filepath: str) -> List[Job]:
     with open(filepath) as f:
         data = json.load(f)
     return [Job.from_dict(j) for j in data['jobs']]
 
-def load_workcenters_from_json(filepath):
+def load_workcenters_from_json(filepath: str) -> List[Workcenter]:
     with open(filepath) as f:
         data = json.load(f)
     return [Workcenter.from_dict(wc) for wc in data['workcenters']]
 
 
 
-def save_schedule_to_json(schedule, path):
+def save_schedule_to_json(schedule: Any, path: str) -> None:
     with open(path, 'w') as f:
         json.dump(schedule.to_dict(), f, indent=2)
 
-def parse_job_file(filepath):
-    jobs = []
+def parse_job_file(filepath: str) -> List[Job]:
+    jobs: List[Dict[str, Any]] = []
     with open(filepath) as f:
         lines = f.readlines()
     job = None
@@ -49,8 +51,8 @@ def parse_job_file(filepath):
         jobs.append(job)
     return [Job.from_dict(j) for j in jobs]
 
-def parse_mch_file(filepath):
-    workcenters = []
+def parse_mch_file(filepath: str) -> List[Workcenter]:
+    workcenters: List[Dict[str, Any]] = []
     with open(filepath) as f:
         lines = f.readlines()
     wc = None
@@ -95,9 +97,9 @@ def parse_mch_file(filepath):
                 "status": wc_dict.get("status", "A")
             })
     # Convert dicts to objects and set workcenter attribute on each machine
-    workcenter_objs = []
+    workcenter_objs: List[Workcenter] = []
     for wc_dict in workcenters:
-        machines = []
+        machines: List[Machine] = []
         for m_dict in wc_dict['machines']:
             m = Machine(
                 name=m_dict['name'],
@@ -115,8 +117,8 @@ def parse_mch_file(filepath):
     return workcenter_objs
 
 
-def parse_seq_file(filepath):
-    schedules = []
+def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
+    schedules: List[Dict[str, Any]] = []
     with open(filepath) as f:
         lines = f.readlines()
     schedule = None
@@ -150,7 +152,7 @@ def parse_seq_file(filepath):
         schedules.append(schedule)
     return schedules
 
-def save_schedule_to_seq(schedule, filepath):
+def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
     with open(filepath, "w") as f:
         # Write schedule header
         f.write(f"Schedule:           {schedule.schedule_type}\n")
@@ -165,9 +167,9 @@ def save_schedule_to_seq(schedule, filepath):
 
 
 # ------------------- Export Functions -------------------
-def export_jobs_to_jobfile(system, filepath):
+def export_jobs_to_jobfile(system: Any, filepath: str) -> None:
     with open(filepath, 'w') as f:
-        f.write("Shop:               Exported\n")
+        f.write("Shop:               Job\n")
         for job in system.jobs:
             f.write(f"Job:                {job.job_id}\n")
             f.write(f"  RGB:                {';'.join(map(str, job.rgb))}\n")
@@ -179,9 +181,9 @@ def export_jobs_to_jobfile(system, filepath):
             f.write("\n")
 
 
-def export_workcenters_to_mchfile(system, filepath):
+def export_workcenters_to_mchfile(system: Any, filepath: str) -> None:
     with open(filepath, 'w') as f:
-        f.write("Exported:\n")
+        f.write("Ordinary:\n")
         for wc in system.workcenters:
             f.write(f"Workcenter:         {wc.name}\n")
             f.write(f"  RGB:                {';'.join(map(str, wc.rgb))}\n")
@@ -194,7 +196,7 @@ def export_workcenters_to_mchfile(system, filepath):
             f.write("\n")
 
 
-def export_system_to_json(system, filepath):
+def export_system_to_json(system: Any, filepath: str) -> None:
     system_dict = {
         "jobs": [job.to_dict() for job in system.jobs],
         "workcenters": [wc.to_dict() for wc in system.workcenters]

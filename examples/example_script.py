@@ -1,4 +1,4 @@
-from lekinpy.io import load_jobs_from_json, parse_job_file, parse_mch_file, save_schedule_to_seq, load_workcenters_from_json
+from lekinpy.io import load_jobs_from_json, parse_job_file,parse_mch_file, save_schedule_to_seq, load_workcenters_from_json
 from lekinpy.algorithms.fcfs import FCFSAlgorithm
 from lekinpy.machine import Machine, Workcenter
 from lekinpy.schedule import Schedule
@@ -6,8 +6,8 @@ from lekinpy.system import System
 from lekinpy.job import Job, Operation
 import json
 # Load .job and .mch files
-jobs = parse_job_file("Data/Single Machine/exported_test.job")
-workcenters = parse_mch_file("Data/Single Machine/exported_test.mch")
+jobs = parse_job_file("Data/Exported/Jobs.job")
+workcenters = parse_mch_file("Data/Exported/Machines.mch")
 
 print("\nJobs loaded:", len(jobs))
 print("Jobs:", jobs)
@@ -91,13 +91,23 @@ for wc in workcenters:
 print(json.dumps(system.to_dict(), indent=2))
 
 
-# Run FCFS scheduling algorithm
 fcfs = FCFSAlgorithm()
-system_schedule = fcfs.schedule(system)
+schedule = fcfs.schedule(system)
+system.set_schedule(schedule)
 
-# Print schedule
-print("Schedule:")
-print(system_schedule.to_dict())
+# 5. Print schedule and job details using new methods
+schedule.display_machine_details()
+schedule.display_job_details(system)
+
+# 7. Display sequence
+schedule.display_sequence(system)
+
+# 8. Display summary
+schedule.display_summary(system)
+
+
+# 6. Plot Gantt chart using new method
+schedule.plot_gantt_chart(system)
 
 # # Save schedule to .seq file
 # # with open("Data/Single Machine/output.seq", "w") as f:

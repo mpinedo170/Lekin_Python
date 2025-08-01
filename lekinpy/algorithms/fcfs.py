@@ -3,40 +3,37 @@ from ..schedule import Schedule, MachineSchedule
 
 class FCFSAlgorithm(SchedulingAlgorithm):
     def schedule(self, system):
-        # Simple First-Come-First-Serve: assign jobs to machines in order
-        assignments = []
-        time = 0
-        machine_count = len(system.machines)
+        self.prepare(system)
+
         machine_job_map = {machine.name: [] for machine in system.machines}
-        machine_workcenter_map = {}
-        # Try to get workcenter for each machine (if possible)
-        if hasattr(system, 'workcenters'):
-            for wc in getattr(system, 'workcenters', []):
-                for m in wc.machines:
-                    machine_workcenter_map[m.name] = wc.name
-        for idx, job in enumerate(system.jobs):
-            machine = system.machines[idx % machine_count]
-            start_time = time
-            processing_time = job.operations[0].processing_time  # or .duration, .time, etc.
-            end_time = time + processing_time
-            assignments.append({
-                'job_id': job.job_id,
-                'machine_id': machine.name,
-                'start_time': start_time,
-                'end_time': end_time
-            })
-            machine_job_map[machine.name].append(job.job_id)
-            time = end_time
-        # Build MachineSchedule list
+
+        sorted_jobs = sorted(system.jobs, key=lambda j: j.release)
+        for job in sorted_jobs:
+            op = job.operations[0]
+            target_wc = op.workcenter
+
+            candidate_machines = self.get_machines_for_workcenter(system, target_wc)
+            if not candidate_machines:
+                raise ValueError(f"No machines found for workcenter {target_wc}")
+
+            chosen_machine = self.get_earliest_machine(candidate_machines)
+            start_time = max(job.release, self.machine_available_time[chosen_machine.name])
+            end_time = start_time + op.processing_time
+
+            job.start_time = start_time
+            job.end_time = end_time
+
+            machine_job_map[chosen_machine.name].append(job.job_id)
+            self.update_machine_time(chosen_machine.name, end_time)
+
         machines = []
         for machine in system.machines:
-            workcenter = machine_workcenter_map.get(machine.name, None)
+            workcenter = self.machine_workcenter_map.get(machine.name, None)
             machines.append(MachineSchedule(
                 workcenter=workcenter,
                 machine=machine.name,
                 operations=machine_job_map[machine.name]
             ))
-        schedule_type = "FCFS"
-        rgb = (0, 0, 0)
-        total_time = time
-        return Schedule(schedule_type, rgb, total_time, machines)
+
+        total_time = max(self.machine_available_time.values()) if self.machine_available_time else 0
+        return Schedule("FCFS", (0, 0, 0), total_time, machines)

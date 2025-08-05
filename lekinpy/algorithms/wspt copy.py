@@ -1,7 +1,7 @@
 from .base import SchedulingAlgorithm
 from ..schedule import Schedule, MachineSchedule
 
-class WSPTAlgorithm(SchedulingAlgorithm):
+class WSPT(SchedulingAlgorithm):
     def schedule(self, system):
         self.prepare(system)
 

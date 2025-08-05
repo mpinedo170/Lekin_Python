@@ -1,71 +1,68 @@
 from ..schedule import MachineSchedule, Schedule
+
 class SchedulingAlgorithm:
     def __init__(self):
         self.machine_workcenter_map = {}
         self.machine_available_time = {}
+        self.machine_job_map = {}  # Tracks jobs per machine
 
     def prepare(self, system):
+        """Prepare scheduling structures and track machine availability and workcenter mapping."""
         self.machine_workcenter_map = {}
-        self.machine_available_time = {m.name: getattr(m, 'release', 0) for m in system.machines}
-        self.machine_job_map = {m.name: [] for m in system.machines}
+        # Initialize machine availability with release time (default to 0)
+        self.machine_available_time = {machine.name: getattr(machine, 'release', 0) for machine in system.machines}
+        self.machine_job_map = {machine.name: [] for machine in system.machines}
+
+        # Map machines to workcenters
         if hasattr(system, 'workcenters'):
-            for wc in getattr(system, 'workcenters', []):
-                for m in wc.machines:
-                    self.machine_workcenter_map[m.name] = wc.name
+            for workcenter in getattr(system, 'workcenters', []):
+                for machine in workcenter.machines:
+                    self.machine_workcenter_map[machine.name] = workcenter.name
+        else:
+            for machine in system.machines:
+                # If no explicit workcenters, use machine name as workcenter
+                self.machine_workcenter_map[machine.name] = machine.name
 
-    def get_machines_for_workcenter(self, system, workcenter_name):
-        return [m for m in system.machines if self.machine_workcenter_map.get(m.name) == workcenter_name]
+    def _get_machines_for_workcenter(self, system, workcenter_name):
+        """Returns machines that belong to a specific workcenter."""
+        return [machine for machine in system.machines if self.machine_workcenter_map.get(machine.name) == workcenter_name]
 
-    def get_earliest_machine(self, machines):
-        return min(machines, key=lambda m: self.machine_available_time[m.name])
+    def _get_earliest_machine(self, machines):
+        """Returns the machine that becomes available the earliest."""
+        return min(machines, key=lambda machine: self.machine_available_time[machine.name])
 
-    def update_machine_time(self, machine_name, end_time):
+    def _update_machine_time(self, machine_name, end_time):
+        """Updates the availability time of a machine."""
         self.machine_available_time[machine_name] = end_time
 
-    def assign_operations(self, jobs, system):
-        jobs_queue = jobs[:]
-        scheduled_jobs = set()
+    def _assign_single_operation(self, job, operation, chosen_machine):
+        """
+        Assigns a single operation to a machine.
+        """
+        previous_end_time = job.operations[job.operations.index(operation) - 1].end_time if job.operations.index(operation) > 0 else job.release
+        start_time = max(previous_end_time, self.machine_available_time[chosen_machine.name])
+        end_time = start_time + operation.processing_time
 
-        while len(scheduled_jobs) < len(jobs):
-            available_jobs = [
-                job for job in jobs_queue
-                if job.release <= min(self.machine_available_time.values())
-                and job.job_id not in scheduled_jobs
-            ]
+        # Update operation
+        operation.start_time = start_time
+        operation.end_time = end_time
 
-            if not available_jobs:
-                next_release_time = min(
-                    [job.release for job in jobs_queue if job.job_id not in scheduled_jobs]
-                )
-                earliest_machine = self.get_earliest_machine(system.machines)
-                self.machine_available_time[earliest_machine.name] = max(
-                    self.machine_available_time[earliest_machine.name], next_release_time
-                )
-                continue
+        # Update job's overall start/end
+        job.start_time = job.operations[0].start_time
+        job.end_time = operation.end_time
 
-            for job in available_jobs:
-                previous_end_time = 0
-                for op in job.operations:
-                    target_wc = op.workcenter
-                    candidate_machines = self.get_machines_for_workcenter(system, target_wc)
-                    chosen_machine = self.get_earliest_machine(candidate_machines)
+        # Update machine
+        self._update_machine_time(chosen_machine.name, end_time)
+        self.machine_job_map[chosen_machine.name].append(job.job_id)
 
-                    start_time = max(job.release, self.machine_available_time[chosen_machine.name], previous_end_time)
-                    end_time = start_time + op.processing_time
-
-                    op.start_time = start_time
-                    op.end_time = end_time
-
-                    previous_end_time = end_time
-                    self.machine_job_map[chosen_machine.name].append(job.job_id)
-                    self.update_machine_time(chosen_machine.name, end_time)
-
-                job.start_time = job.operations[0].start_time
-                job.end_time = job.operations[-1].end_time
-                scheduled_jobs.add(job.job_id)
+    def _get_available_jobs(self, unscheduled_jobs, current_time):
+        """
+        Returns jobs released at or before the current time.
+        """
+        return [job for job in unscheduled_jobs if job.release <= current_time]
 
     def schedule(self, system):
-        raise NotImplementedError("Subclasses should implement this!")
+        raise NotImplementedError("Subclasses must implement this method!")
 
     def get_machine_schedules(self, system):
         machines = []

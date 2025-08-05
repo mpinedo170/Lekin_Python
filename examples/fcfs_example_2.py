@@ -3,7 +3,6 @@ from lekinpy.system import System
 from lekinpy.job import Job, Operation
 from lekinpy.machine import Machine, Workcenter
 from lekinpy.algorithms.fcfs import FCFSAlgorithm
-from lekinpy.algorithms.fcfs_cpp import FCFS_CPPStyle_Algorithm
 import matplotlib.pyplot as plt
 
 # 1. Create system

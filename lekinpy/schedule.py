@@ -67,7 +67,7 @@ class Schedule:
             status = job.operations[0].status
             bgn, end = job_timings.get(job_id, (None, None))
             if bgn is not None:
-                T = end - due # If this is negative this is zero
+                T = end - due  # If this is negative this is zero
                 T = max(T, 0)  # Ensure T is not negative
                 wT = T * weight
                 print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")

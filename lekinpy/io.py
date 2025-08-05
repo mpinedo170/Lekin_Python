@@ -1,7 +1,6 @@
 import json
-from .job import Job, Operation
+from .job import Job
 from .machine import Workcenter, Machine
-
 from typing import Any, List, Dict
 
 def load_jobs_from_json(filepath: str) -> List[Job]:
@@ -9,16 +8,15 @@ def load_jobs_from_json(filepath: str) -> List[Job]:
         data = json.load(f)
     return [Job.from_dict(j) for j in data['jobs']]
 
+
 def load_workcenters_from_json(filepath: str) -> List[Workcenter]:
     with open(filepath) as f:
         data = json.load(f)
     return [Workcenter.from_dict(wc) for wc in data['workcenters']]
-
-
-
 def save_schedule_to_json(schedule: Any, path: str) -> None:
     with open(path, 'w') as f:
         json.dump(schedule.to_dict(), f, indent=2)
+
 
 def parse_job_file(filepath: str) -> List[Job]:
     jobs: List[Dict[str, Any]] = []
@@ -51,6 +49,7 @@ def parse_job_file(filepath: str) -> List[Job]:
         jobs.append(job)
     return [Job.from_dict(j) for j in jobs]
 
+
 def parse_mch_file(filepath: str) -> List[Workcenter]:
     workcenters: List[Dict[str, Any]] = []
     with open(filepath) as f:
@@ -62,7 +61,7 @@ def parse_mch_file(filepath: str) -> List[Workcenter]:
             if wc:
                 workcenters.append(wc)
             wc_name = line.split(":")[1].strip()
-            wc = {'name': wc_name, 'machines': [], 'release': 0, 'status': 'A', 'rgb': (0,0,0)}
+            wc = {'name': wc_name, 'machines': [], 'release': 0, 'status': 'A', 'rgb': (0, 0, 0)}
             machine = None
         elif line.strip().startswith("Machine:"):
             if machine:
@@ -117,6 +116,7 @@ def parse_mch_file(filepath: str) -> List[Workcenter]:
     return workcenter_objs
 
 
+
 def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
     schedules: List[Dict[str, Any]] = []
     with open(filepath) as f:
@@ -152,6 +152,7 @@ def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
         schedules.append(schedule)
     return schedules
 
+
 def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
     with open(filepath, "w") as f:
         # Write schedule header
@@ -164,6 +165,7 @@ def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
             f.write(f"  Machine:            {machine_schedule.workcenter};{machine_schedule.machine}\n")
             for job_id in machine_schedule.operations:
                 f.write(f"    Oper:               {job_id}\n")
+
 
 
 # ------------------- Export Functions -------------------
@@ -181,6 +183,7 @@ def export_jobs_to_jobfile(system: Any, filepath: str) -> None:
             f.write("\n")
 
 
+
 def export_workcenters_to_mchfile(system: Any, filepath: str) -> None:
     with open(filepath, 'w') as f:
         f.write("Ordinary:\n")
@@ -196,55 +199,15 @@ def export_workcenters_to_mchfile(system: Any, filepath: str) -> None:
             f.write("\n")
 
 
+
 def export_system_to_json(system: Any, filepath: str) -> None:
     system_dict = {
         "jobs": [job.to_dict() for job in system.jobs],
         "workcenters": [wc.to_dict() for wc in system.workcenters]
     }
-    with open(filepath, 'w') as f:
-        json.dump(system_dict, f, indent=2)
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(system_dict, f, indent=2)
+    except (OSError, TypeError, ValueError) as e:
+        print(f"Error exporting system to JSON: {e}")
 
-
-# def parse_mch_file(filepath):
-#     workcenters = []
-#     with open(filepath) as f:
-#         lines = f.readlines()
-#     wc = None
-#     machine = None
-#     for line in lines:
-#         line = line.strip()
-#         if line.startswith("Workcenter:"):
-#             if wc:
-#                 workcenters.append(wc)
-#             wc = {"machines": []}
-#             wc["name"] = line.split(":")[1].strip()
-#         elif line.startswith("Release:") and machine is None:
-#             wc["release"] = int(line.split(":")[1].strip())
-#         elif line.startswith("Status:") and machine is None:
-#             wc["status"] = line.split(":")[1].strip()
-#         elif line.startswith("RGB:"):
-#             wc["rgb"] = tuple(map(int, line.split(":")[1].strip().split(";")))
-#         elif line.startswith("Machine:"):
-#             if machine:
-#                 wc["machines"].append(machine)
-#             machine = {}
-#             machine["name"] = line.split(":")[1].strip()
-#         elif line.startswith("Release:") and machine is not None:
-#             machine["release"] = int(line.split(":")[1].strip())
-#         elif line.startswith("Status:") and machine is not None:
-#             machine["status"] = line.split(":")[1].strip()
-#         elif line.startswith("Batch:"):
-#             machine["batch"] = int(line.split(":")[1].strip())
-#     if machine:
-#         wc["machines"].append(machine)
-#     if wc:
-#         workcenters.append(wc)
-#     for wc_dict in workcenters:
-#         if not wc_dict["machines"]:
-#             wc_dict["machines"].append({
-#                 "name": f"{wc_dict['name']}.01",
-#                 "release": wc_dict.get("release", 0),
-#                 "status": wc_dict.get("status", "A"),
-#                 "batch": 1
-#             })
-#     return [Workcenter.from_dict(w) for w in workcenters]

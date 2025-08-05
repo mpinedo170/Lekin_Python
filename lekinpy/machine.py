@@ -1,11 +1,16 @@
 import random
-
 from typing import Any, Dict, List, Optional, Tuple
 
 class Machine:
     def __init__(self, name: str, release: float, status: str) -> None:
+        if not isinstance(name, str):
+            raise TypeError("name must be a string")
+        if not isinstance(release, (int, float)):
+            raise TypeError("release must be a number")
+        if not isinstance(status, str):
+            raise TypeError("status must be a string")
         self.name: str = name
-        self.release: float = release
+        self.release: float = float(release)
         self.status: str = status
 
     def __repr__(self) -> str:
@@ -44,8 +49,18 @@ class Workcenter:
         machines: List[Machine],
         rgb: Optional[Tuple[int, int, int]] = None
     ) -> None:
+        if not isinstance(name, str):
+            raise TypeError("name must be a string")
+        if not isinstance(release, (int, float)):
+            raise TypeError("release must be a number")
+        if not isinstance(status, str):
+            raise TypeError("status must be a string")
+        if not isinstance(machines, list) or not all(isinstance(m, Machine) for m in machines):
+            raise TypeError("machines must be a list of Machine instances")
+        if rgb is not None and (not isinstance(rgb, tuple) or len(rgb) != 3 or not all(isinstance(c, int) for c in rgb)):
+            raise TypeError("rgb must be a tuple of three integers")
         self.name: str = name
-        self.release: float = release
+        self.release: float = float(release)
         self.status: str = status
         self.rgb: Tuple[int, int, int] = rgb if rgb else Workcenter._available_colors.pop()
         self.machines: List[Machine] = machines

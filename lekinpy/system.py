@@ -1,8 +1,6 @@
 from .job import Job
 from .machine import Machine, Workcenter
 from .schedule import Schedule
-
-
 from typing import Any, Dict, List, Optional
 
 class System:
@@ -12,12 +10,18 @@ class System:
         self.schedule: Optional[Schedule] = None
 
     def add_job(self, job: Job) -> None:
+        if not isinstance(job, Job):
+            raise TypeError("job must be a Job instance")
         self.jobs.append(job)
 
     def add_workcenter(self, workcenter: Workcenter) -> None:
+        if not isinstance(workcenter, Workcenter):
+            raise TypeError("workcenter must be a Workcenter instance")
         self.workcenters.append(workcenter)
 
     def set_schedule(self, schedule: Schedule) -> None:
+        if not isinstance(schedule, Schedule):
+            raise TypeError("schedule must be a Schedule instance")
         self.schedule = schedule
 
     @property

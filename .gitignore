@@ -1,1 +1,16 @@
 .venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.DS_Store
+Data/
+Data2/
+tests/
+lekinpy.egg-info/
+.vscode/

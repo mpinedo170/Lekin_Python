@@ -25,7 +25,7 @@ class WSPTAlgorithm(SchedulingAlgorithm):
                 next_release = min(job.release for job in unscheduled_jobs.values())
                 # Find the machine that is available the earliest (i.e., whose clock is the lowest)
                 earliest_machine = min(self.machine_available_time, key=self.machine_available_time.get)
-                # Fast-forward this machine’s clock to the next job release time so it can pick up the job next
+                # Fast-forward this machine's clock to the next job release time so it can pick up the job next
                 self.machine_available_time[earliest_machine] = next_release
                 # Skip this iteration and let the loop continue with updated machine time
                 continue

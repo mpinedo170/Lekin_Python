@@ -1,11 +1,16 @@
 import random
-
 from typing import Any, Dict, List, Optional, Tuple
 
 class Operation:
     def __init__(self, workcenter: str, processing_time: float, status: str) -> None:
+        if not isinstance(workcenter, str):
+            raise TypeError("workcenter must be a string")
+        if not isinstance(processing_time, (int, float)):
+            raise TypeError("processing_time must be a number")
+        if not isinstance(status, str):
+            raise TypeError("status must be a string")
         self.workcenter: str = workcenter
-        self.processing_time: float = processing_time
+        self.processing_time: float = float(processing_time)
         self.status: str = status
 
     def __repr__(self) -> str:
@@ -28,10 +33,22 @@ class Job:
         operations: List[Operation],
         rgb: Optional[Tuple[int, int, int]] = None
     ) -> None:
+        if not isinstance(job_id, str):
+            raise TypeError("job_id must be a string")
+        if not isinstance(release, (int, float)):
+            raise TypeError("release must be a number")
+        if not isinstance(due, (int, float)):
+            raise TypeError("due must be a number")
+        if not isinstance(weight, (int, float)):
+            raise TypeError("weight must be a number")
+        if not isinstance(operations, list) or not all(isinstance(op, Operation) for op in operations):
+            raise TypeError("operations must be a list of Operation instances")
+        if rgb is not None and (not isinstance(rgb, tuple) or len(rgb) != 3 or not all(isinstance(c, int) for c in rgb)):
+            raise TypeError("rgb must be a tuple of three integers")
         self.job_id: str = job_id
-        self.release: float = release
-        self.due: float = due
-        self.weight: float = weight
+        self.release: float = float(release)
+        self.due: float = float(due)
+        self.weight: float = float(weight)
         self.rgb: Tuple[int, int, int] = rgb if rgb else Job._available_colors.pop()
         self.operations: List[Operation] = operations
 

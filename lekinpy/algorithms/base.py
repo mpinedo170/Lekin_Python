@@ -2,8 +2,8 @@ from ..schedule import MachineSchedule, Schedule
 
 class SchedulingAlgorithm:
     """
-    Base class for scheduling algorithms. 
-    Provides shared methods and structures for machine assignment, 
+    Base class for scheduling algorithms.
+    Provides shared methods and structures for machine assignment,
     tracking availability, and dynamic scheduling.
     """
 

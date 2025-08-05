@@ -9,7 +9,14 @@ lekinpy/system.py
 lekinpy.egg-info/PKG-INFO
 lekinpy.egg-info/SOURCES.txt
 lekinpy.egg-info/dependency_links.txt
+lekinpy.egg-info/requires.txt
 lekinpy.egg-info/top_level.txt
 lekinpy/algorithms/__init__.py
+lekinpy/algorithms/base copy.py
 lekinpy/algorithms/base.py
+lekinpy/algorithms/edd.py
+lekinpy/algorithms/fcfs copy.py
 lekinpy/algorithms/fcfs.py
+lekinpy/algorithms/spt.py
+lekinpy/algorithms/wspt copy.py
+lekinpy/algorithms/wspt.py

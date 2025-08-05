@@ -4,7 +4,6 @@ from ..schedule import Schedule
 
 class EDDAlgorithm(SchedulingAlgorithm):
     def schedule(self, system):
-
         def edd_selector_function(jobs):
             """
             Custom EDD selection function that calculates the EDD value for a job.

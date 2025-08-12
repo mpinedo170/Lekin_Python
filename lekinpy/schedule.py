@@ -99,7 +99,7 @@ class Schedule:
         ax.set_yticks(yticks)
         ax.set_yticklabels(yticklabels)
         ax.set_xlabel("Time")
-        ax.set_title("Gantt Chart - FCFS Example 2")
+        ax.set_title("Gantt Chart")
         ax.set_xlim(left=0)
         plt.tight_layout()
         plt.show()

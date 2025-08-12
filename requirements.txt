@@ -1,2 +1,0 @@
-# Editable install with no version control (lekinpy==0.1.0)
--e /Users/ruturaj_vasant/Desktop/PersonalProjects/Lekin/Lekin_Python

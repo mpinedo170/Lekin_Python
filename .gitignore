@@ -14,4 +14,4 @@ Data/
 Data2/
 lekinpy.egg-info/
 .vscode/
-.venv-test/
+.venv-test/.venv-test

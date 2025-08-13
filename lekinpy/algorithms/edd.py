@@ -1,4 +1,3 @@
-from lekinpy import machine
 from .base import SchedulingAlgorithm
 from ..schedule import Schedule
 
@@ -10,6 +9,6 @@ class EDDAlgorithm(SchedulingAlgorithm):
             """
             return min(jobs, key=lambda job: job.due)
 
-        total_time, machine = self.dynamic_schedule(system, edd_selector_function)
+        total_time, machines = self.dynamic_schedule(system, edd_selector_function)
 
-        return Schedule("EDD", total_time, machine)
+        return Schedule("EDD", total_time, machines)

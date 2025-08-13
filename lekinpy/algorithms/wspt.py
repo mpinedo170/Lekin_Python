@@ -1,5 +1,5 @@
 from .base import SchedulingAlgorithm
-from ..schedule import Schedule, MachineSchedule
+from ..schedule import Schedule
 
 class WSPTAlgorithm(SchedulingAlgorithm):
     def schedule(self, system):

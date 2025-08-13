@@ -1,5 +1,5 @@
 from .base import SchedulingAlgorithm
-from ..schedule import Schedule, MachineSchedule
+from ..schedule import Schedule
 
 class SPTAlgorithm(SchedulingAlgorithm):
     def schedule(self, system):
@@ -9,6 +9,6 @@ class SPTAlgorithm(SchedulingAlgorithm):
             """
             return min(jobs, key=lambda job: job.operations[0].processing_time if job.operations else float('inf'))
 
-        total_time, machine = self.dynamic_schedule(system, spt_selector_function)
+        total_time, machines = self.dynamic_schedule(system, spt_selector_function)
 
-        return Schedule("SPT", total_time, machine)
+        return Schedule("SPT", total_time, machines)

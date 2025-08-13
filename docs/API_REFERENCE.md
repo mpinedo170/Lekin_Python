@@ -30,6 +30,7 @@ This document describes the public API exposed by `lekinpy 0.1.0`.
     - [SPTAlgorithm](#sptalgorithm)
     - [EDDAlgorithm](#eddalgorithm)
     - [WSPTAlgorithm](#wsptalgorithm)
+  - [Authoring Custom Algorithms](#authoring-custom-algorithms)
   - [End‑to‑End Examples](#end-to-end-examples)
 
 ---
@@ -611,6 +612,54 @@ sched = WSPTAlgorithm().schedule(system)
 ```
 
 ---
+
+## Authoring Custom Algorithms
+
+You can plug in your own rule by subclassing `SchedulingAlgorithm`. Use the built‑in `dynamic_schedule(...)` helper (single‑operation assumption) or implement your own loop.
+
+### Minimal Template
+```python
+from lekinpy.algorithms import SchedulingAlgorithm
+from lekinpy.schedule import Schedule
+
+class MyRule(SchedulingAlgorithm):
+    def schedule(self, system):
+        # Choose among currently released jobs
+        def pick(available_jobs):
+            # example: tie‑break by job_id after shortest processing time
+            return min(
+                available_jobs,
+                key=lambda j: (j.operations[0].processing_time, j.job_id)
+            )
+        total_time, machines = self.dynamic_schedule(system, pick)
+        return Schedule("MyRule", total_time, machines)
+```
+
+### Using Your Algorithm in a System
+```python
+from lekinpy.system import System
+from lekinpy.job import Job, Operation
+from lekinpy.machine import Machine, Workcenter
+
+sys = System()
+sys.add_workcenter(Workcenter("W01", 0, "A", [Machine("A1", 0, "A")]))
+sys.add_job(Job("J1", 0, 10, 1, [Operation("W01", 5, "A")]))
+
+algo = MyRule()
+schedule = algo.schedule(sys)
+sys.set_schedule(schedule)
+```
+
+### When You Need More Than One Operation per Job
+- `dynamic_schedule` currently considers the **first** operation of each job. For multi‑operation routing, either:
+  - Use `FCFSAlgorithm` (which executes all operations in order), or
+  - Write a custom loop: advance time, track per‑operation readiness, and assign eligible operations to machines.
+
+### Packaging (Optional)
+If you publish your rule inside `lekinpy/algorithms/`, export it via `lekinpy/algorithms/__init__.py` and `lekinpy/__init__.py` so users can do:
+```python
+from lekinpy.algorithms import MyRule
+```
 
 ### Data IO Patterns — Three Ways to Load & Save
 

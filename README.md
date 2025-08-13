@@ -44,6 +44,7 @@ schedule.plot_gantt_chart(system)
 ```
 
 ## API Reference
+📚 **Full API Reference:** [docs/API_REFERENCE.md](docs/API_REFERENCE.md)
 
 - `System`, `Job`, `Operation`, `Machine`, `Workcenter`
 - Algorithms: `FCFSAlgorithm`, `SPTAlgorithm`, `EDDAlgorithm`, `WSPTAlgorithm`

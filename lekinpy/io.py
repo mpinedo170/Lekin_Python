@@ -1,7 +1,40 @@
 import json
+import os
+import tempfile
 from .job import Job
 from .machine import Workcenter, Machine
 from typing import Any, List, Dict
+
+# ---- internal helpers for integer-only semantics ----
+def _coerce_int(value: Any, field: str) -> int:
+    """
+    Accept ints, or floats that are whole-numbered (e.g., 5.0 → 5).
+    Raise ValueError for non-integer values like 5.5, 'abc', etc.
+    """
+    if isinstance(value, bool):
+        # prevent True/False being treated as ints
+        raise ValueError(f"Invalid value for {field}: {value}. The CPP LEKIN system accepts only integers.")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        if value.is_integer():
+            return int(value)
+        raise ValueError(f"Invalid value for {field}: {value}. The CPP LEKIN system accepts only integers.")
+    # strings or other objects: try float first
+    try:
+        f = float(str(value).strip())
+    except Exception:
+        raise ValueError(f"Invalid value for {field}: {value}. The CPP LEKIN system accepts only integers.")
+    if f.is_integer():
+        return int(f)
+    raise ValueError(f"Invalid value for {field}: {value}. The CPP LEKIN system accepts only integers.")
+
+
+def _parse_int_str(token: str, field: str) -> int:
+    """
+    Parse a numeric token that may be '5', '5.0', etc., enforcing integer semantics.
+    """
+    return _coerce_int(token, field)
 
 def load_jobs_from_json(filepath: str) -> List[Job]:
     with open(filepath) as f:
@@ -31,18 +64,18 @@ def parse_job_file(filepath: str) -> List[Job]:
             job = {"operations": []}
             job["job_id"] = line.split(":")[1].strip()
         elif line.startswith("Release:"):
-            job["release"] = int(line.split(":")[1].strip())
+            job["release"] = _parse_int_str(line.split(":")[1].strip(), "release")
         elif line.startswith("Due:"):
-            job["due"] = int(line.split(":")[1].strip())
+            job["due"] = _parse_int_str(line.split(":")[1].strip(), "due")
         elif line.startswith("Weight:"):
-            job["weight"] = int(line.split(":")[1].strip())
+            job["weight"] = _parse_int_str(line.split(":")[1].strip(), "weight")
         elif line.startswith("RGB:"):
             job["rgb"] = tuple(map(int, line.split(":")[1].strip().split(";")))
         elif line.startswith("Oper:"):
             parts = line.split(":")[1].strip().split(";")
             job["operations"].append({
                 "workcenter": parts[0],
-                "processing_time": int(parts[1]),
+                "processing_time": _parse_int_str(parts[1], "processing_time"),
                 "status": parts[2]
             })
     if job:
@@ -69,7 +102,7 @@ def parse_mch_file(filepath: str) -> List[Workcenter]:
             machine_name = line.split(":")[1].strip()
             machine = {'name': machine_name, 'release': 0, 'status': 'A'}
         elif line.strip().startswith("Release:"):
-            value = int(line.split(":")[1].strip())
+            value = _parse_int_str(line.split(":")[1].strip(), "release")
             if machine is not None:
                 machine['release'] = value
             else:
@@ -170,33 +203,51 @@ def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
 
 # ------------------- Export Functions -------------------
 def export_jobs_to_jobfile(system: Any, filepath: str) -> None:
-    with open(filepath, 'w') as f:
-        f.write("Shop:               Job\n")
-        for job in system.jobs:
-            f.write(f"Job:                {job.job_id}\n")
-            f.write(f"  RGB:                {';'.join(map(str, job.rgb))}\n")
-            f.write(f"  Release:            {job.release}\n")
-            f.write(f"  Due:                {job.due}\n")
-            f.write(f"  Weight:             {job.weight}\n")
-            for op in job.operations:
-                f.write(f"  Oper:               {op.workcenter};{op.processing_time};{op.status}\n")
-            f.write("\n")
+    # Build content in-memory so we don't leave partial files on error
+    lines = []
+    lines.append("Shop:               Job\n")
+    for job in system.jobs:
+        rel = _coerce_int(job.release, "release")
+        due = _coerce_int(job.due, "due")
+        wgt = _coerce_int(job.weight, "weight")
+        lines.append(f"Job:                {job.job_id}\n")
+        lines.append(f"  RGB:                {';'.join(map(str, job.rgb))}\n")
+        lines.append(f"  Release:            {rel}\n")
+        lines.append(f"  Due:                {due}\n")
+        lines.append(f"  Weight:             {wgt}\n")
+        for op in job.operations:
+            pt = _coerce_int(op.processing_time, "processing_time")
+            lines.append(f"  Oper:               {op.workcenter};{pt};{op.status}\n")
+        lines.append("\n")
+    # Atomic write: write to temp then replace
+    dir_name = os.path.dirname(filepath) or "."
+    with tempfile.NamedTemporaryFile("w", delete=False, dir=dir_name, encoding="utf-8") as tmp:
+        tmp.writelines(lines)
+        tmp_path = tmp.name
+    os.replace(tmp_path, filepath)
 
 
 
 def export_workcenters_to_mchfile(system: Any, filepath: str) -> None:
-    with open(filepath, 'w') as f:
-        f.write("Ordinary:\n")
-        for wc in system.workcenters:
-            f.write(f"Workcenter:         {wc.name}\n")
-            f.write(f"  RGB:                {';'.join(map(str, wc.rgb))}\n")
-            f.write(f"  Release:            {wc.release}\n")
-            f.write(f"  Status:             {wc.status}\n")
-            for m in wc.machines:
-                f.write(f"Machine:            {m.name}\n")
-                f.write(f"    Release:            {m.release}\n")
-                f.write(f"    Status:             {m.status}\n")
-            f.write("\n")
+    lines = []
+    lines.append("Ordinary:\n")
+    for wc in system.workcenters:
+        wc_rel = _coerce_int(wc.release, "release")
+        lines.append(f"Workcenter:         {wc.name}\n")
+        lines.append(f"  RGB:                {';'.join(map(str, wc.rgb))}\n")
+        lines.append(f"  Release:            {wc_rel}\n")
+        lines.append(f"  Status:             {wc.status}\n")
+        for m in wc.machines:
+            m_rel = _coerce_int(m.release, "release")
+            lines.append(f"Machine:            {m.name}\n")
+            lines.append(f"    Release:            {m_rel}\n")
+            lines.append(f"    Status:             {m.status}\n")
+        lines.append("\n")
+    dir_name = os.path.dirname(filepath) or "."
+    with tempfile.NamedTemporaryFile("w", delete=False, dir=dir_name, encoding="utf-8") as tmp:
+        tmp.writelines(lines)
+        tmp_path = tmp.name
+    os.replace(tmp_path, filepath)
 
 
 
@@ -210,4 +261,3 @@ def export_system_to_json(system: Any, filepath: str) -> None:
             json.dump(system_dict, f, indent=2)
     except (OSError, TypeError, ValueError) as e:
         print(f"Error exporting system to JSON: {e}")
-

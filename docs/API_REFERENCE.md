@@ -1,5 +1,11 @@
 # lekinpy — API Reference
 
+<!--
+Main API reference for the lekinpy library (v0.1.0).
+Use this as both developer documentation and student learning material.
+-->
+
+
 This document describes the public API exposed by `lekinpy 0.1.0`.
 
 - Install: `pip install lekinpy`

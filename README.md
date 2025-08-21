@@ -27,19 +27,31 @@ from lekinpy.job import Job, Operation
 from lekinpy.machine import Machine, Workcenter
 from lekinpy.algorithms.fcfs import FCFSAlgorithm
 
+# Create a new scheduling system
 system = System()
+
+# Define a machine and assign it to a workcenter
 machine = Machine("M1", release=0, status="A")
 workcenter = Workcenter("WC1", release=0, status="A", machines=[machine])
 system.add_workcenter(workcenter)
 
+# Define a job with one operation assigned to WC1
 job = Job("J1", release=0, due=10, weight=1, operations=[Operation("WC1", 5, "A")])
 system.add_job(job)
 
+# Choose the scheduling algorithm (First-Come First-Served)
 algo = FCFSAlgorithm()
+
+# Generate the schedule for the system
 schedule = algo.schedule(system)
+
+# Attach the computed schedule to the system
 system.set_schedule(schedule)
 
+# Print schedule details as a dictionary
 print(system.schedule.to_dict())
+
+# Plot a Gantt chart of the schedule (requires matplotlib)
 schedule.plot_gantt_chart(system)
 ```
 

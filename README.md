@@ -73,6 +73,7 @@ MIT
 
 ## Contact
 Academic Advisor : Michael Pinedo  
+Email: mpinedo@stern.nyu.edu  
 Supervisor: Andrew Feldman  
 Author: Ruturaj Tambe  
 Email: rvt2018@nyu.edu

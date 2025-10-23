@@ -73,5 +73,5 @@ MIT
 
 ## Contact
 Supervisor: Andrew Feldman
-Author: Ruturaj Vasant  
+Author: Ruturaj Tambe  
 Email: rvt2018@nyu.edu

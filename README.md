@@ -72,6 +72,6 @@ schedule.plot_gantt_chart(system)
 MIT
 
 ## Contact
-
+Supervisor: Andrew Feldman
 Author: Ruturaj Vasant  
 Email: rvt2018@nyu.edu

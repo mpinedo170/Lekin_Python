@@ -72,6 +72,7 @@ schedule.plot_gantt_chart(system)
 MIT
 
 ## Contact
-Supervisor: Andrew Feldman
+Academic Advisor : Michael Pinedo  
+Supervisor: Andrew Feldman  
 Author: Ruturaj Tambe  
 Email: rvt2018@nyu.edu

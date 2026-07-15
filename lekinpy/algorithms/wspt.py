@@ -2,6 +2,13 @@ from .base import SchedulingAlgorithm
 from ..schedule import Schedule
 
 class WSPTAlgorithm(SchedulingAlgorithm):
+    metadata = {
+        "id": "wspt",
+        "display_name": "Weighted Shortest Processing Time",
+        "supports_multi_operation": True,
+        "version": "1.0.0",
+    }
+
     def schedule(self, system):
         def wspt_selector_function(jobs):
             """

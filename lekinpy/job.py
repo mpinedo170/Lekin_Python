@@ -1,6 +1,8 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
+from .exceptions import EmptyOperationsError, NonPositiveProcessingTimeError
+
 class Operation:
     def __init__(self, workcenter: str, processing_time: float, status: str) -> None:
         if not isinstance(workcenter, str):
@@ -9,6 +11,10 @@ class Operation:
             raise TypeError("processing_time must be a number")
         if not isinstance(status, str):
             raise TypeError("status must be a string")
+        if processing_time <= 0:
+            raise NonPositiveProcessingTimeError(
+                f"processing_time must be positive, got {processing_time}"
+            )
         self.workcenter: str = workcenter
         self.processing_time: float = float(processing_time)
         self.status: str = status
@@ -45,6 +51,8 @@ class Job:
             raise TypeError("operations must be a list of Operation instances")
         if rgb is not None and (not isinstance(rgb, tuple) or len(rgb) != 3 or not all(isinstance(c, int) for c in rgb)):
             raise TypeError("rgb must be a tuple of three integers")
+        if not operations:
+            raise EmptyOperationsError(f"Job '{job_id}' must have at least one operation")
         self.job_id: str = job_id
         self.release: float = float(release)
         self.due: float = float(due)

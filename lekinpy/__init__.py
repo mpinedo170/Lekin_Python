@@ -8,6 +8,15 @@ from .job import Job, Operation
 from .machine import Machine, Workcenter
 from .schedule import Schedule, MachineSchedule, ScheduledOperation
 from .system import System
+from .exceptions import (
+    LekinValidationError,
+    EmptyOperationsError,
+    NonPositiveProcessingTimeError,
+    EmptyMachineListError,
+    DuplicateJobIdError,
+    DuplicateMachineIdError,
+    MissingWorkcenterError,
+)
 from .io import (
     export_jobs_to_jobfile,
     export_workcenters_to_mchfile,
@@ -39,6 +48,14 @@ __all__ = [
     "MachineSchedule",
     "ScheduledOperation",
     "System",
+    # Validation exceptions
+    "LekinValidationError",
+    "EmptyOperationsError",
+    "NonPositiveProcessingTimeError",
+    "EmptyMachineListError",
+    "DuplicateJobIdError",
+    "DuplicateMachineIdError",
+    "MissingWorkcenterError",
     # IO helpers
     "export_jobs_to_jobfile",
     "export_workcenters_to_mchfile",

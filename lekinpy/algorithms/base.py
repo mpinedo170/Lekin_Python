@@ -20,9 +20,15 @@ class SchedulingAlgorithm:
 
     def prepare(self, system):
         """
-        Prepares internal state: maps machines to workcenters, 
+        Prepares internal state: maps machines to workcenters,
         sets initial machine availability, and initializes job mapping.
         """
+        # Fail early and clearly (e.g. MissingWorkcenterError) rather than
+        # letting a bad reference surface later as a confusing crash inside
+        # _get_earliest_machine (min() on an empty candidate-machines list).
+        if hasattr(system, 'validate'):
+            system.validate()
+
         self.machine_workcenter_map = {}
 
         # Initialize machine availability to their release times (or zero by default)

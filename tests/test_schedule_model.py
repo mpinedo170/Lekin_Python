@@ -50,11 +50,29 @@ def test_schedule_json_round_trip_is_lossless(tmp_path: Path):
 
     assert reloaded.schedule_type == sched.schedule_type
     assert reloaded.time == sched.time
+    assert reloaded.rgb == sched.rgb  # sched.rgb is None here (FCFS doesn't set it)
     assert len(reloaded.machines) == len(sched.machines)
     for original_ms, reloaded_ms in zip(sched.machines, reloaded.machines):
         assert original_ms.machine == reloaded_ms.machine
         assert original_ms.workcenter == reloaded_ms.workcenter
         assert [o.to_dict() for o in original_ms.operations] == [o.to_dict() for o in reloaded_ms.operations]
+
+
+def test_schedule_json_round_trip_preserves_rgb_as_a_tuple(tmp_path: Path):
+    # JSON has no tuple type, so a naive round-trip turns (10, 20, 30) into
+    # [10, 20, 30]. Schedule.from_dict must normalize it back to a tuple so
+    # the round-tripped rgb is actually equal to the original, not just
+    # equal-valued.
+    system = _build_multi_op_system()
+    sched = FCFSAlgorithm().schedule(system)
+    sched.rgb = (10, 20, 30)
+
+    json_path = tmp_path / "schedule_rgb.json"
+    save_schedule_to_json(sched, str(json_path))
+    reloaded = load_schedule_from_json(str(json_path))
+
+    assert reloaded.rgb == (10, 20, 30)
+    assert isinstance(reloaded.rgb, tuple)
 
 
 def test_schedule_seq_round_trip_is_lossless(tmp_path: Path):
@@ -67,6 +85,7 @@ def test_schedule_seq_round_trip_is_lossless(tmp_path: Path):
     reloaded = Schedule.from_dict(parsed[0])
 
     assert reloaded.schedule_type == sched.schedule_type
+    assert reloaded.rgb == sched.rgb  # sched.rgb is None here (FCFS doesn't set it)
     for original_ms, reloaded_ms in zip(sched.machines, reloaded.machines):
         assert original_ms.machine == reloaded_ms.machine
         for original_op, reloaded_op in zip(original_ms.operations, reloaded_ms.operations):
@@ -76,6 +95,34 @@ def test_schedule_seq_round_trip_is_lossless(tmp_path: Path):
             assert original_op.end_time == reloaded_op.end_time
             assert original_op.sequence_position == reloaded_op.sequence_position
             assert original_op.status == reloaded_op.status
+
+
+def test_schedule_seq_round_trip_preserves_none_rgb(tmp_path: Path):
+    # Regression test: save_schedule_to_seq used to fall back to (0, 0, 0)
+    # for a Schedule with rgb=None, silently manufacturing a fake color
+    # instead of preserving "no color was set."
+    system = _build_multi_op_system()
+    sched = FCFSAlgorithm().schedule(system)
+    assert sched.rgb is None
+
+    seq_path = tmp_path / "schedule_no_rgb.seq"
+    save_schedule_to_seq(sched, str(seq_path))
+    parsed = parse_seq_file(str(seq_path))
+
+    assert parsed[0]['rgb'] is None
+
+
+def test_schedule_seq_round_trip_preserves_explicit_rgb(tmp_path: Path):
+    system = _build_multi_op_system()
+    sched = FCFSAlgorithm().schedule(system)
+    sched.rgb = (255, 0, 128)
+
+    seq_path = tmp_path / "schedule_with_rgb.seq"
+    save_schedule_to_seq(sched, str(seq_path))
+    parsed = parse_seq_file(str(seq_path))
+    reloaded = Schedule.from_dict(parsed[0])
+
+    assert reloaded.rgb == (255, 0, 128)
 
 
 def test_parse_seq_file_tolerates_legacy_bare_job_id_format(tmp_path: Path):

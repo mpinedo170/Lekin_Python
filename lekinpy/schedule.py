@@ -105,11 +105,17 @@ class Schedule:
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Schedule':
         machines = [MachineSchedule.from_dict(m) for m in data.get('machines', [])]
+        # JSON has no tuple type, so a schedule round-tripped through
+        # to_dict()/json.dump/json.load comes back with rgb as a list, not a
+        # tuple. Normalize it back so `Schedule.from_dict(json.loads(...))`
+        # round-trips to an equal (not just equal-valued) rgb.
+        rgb_data = data.get('rgb')
+        rgb = tuple(rgb_data) if rgb_data is not None else None
         return Schedule(
             schedule_type=data['schedule_type'],
             time=data['time'],
             machines=machines,
-            rgb=data.get('rgb'),
+            rgb=rgb,
         )
 
     def display_machine_details(self) -> None:

@@ -192,15 +192,15 @@ class SchedulingAlgorithm:
             # Use the algorithm-specific selection rule to pick one job from available ones
             job = job_selector_fn(available_jobs)
 
-            # Select the first operation (assuming single-operation jobs for now)
-            op = job.operations[0]
-
-            # Find eligible machines for this operation and pick the earliest one
-            candidate_machines = self._get_machines_for_workcenter(system, op.workcenter)
-            chosen_machine = self._get_earliest_machine(candidate_machines)
-
-            # Assign operation to the chosen machine
-            self._assign_single_operation(job, op, chosen_machine)
+            # Schedule every operation of the selected job, in order, same as
+            # FCFSAlgorithm: for each operation find the earliest-available
+            # eligible machine and assign it. _assign_single_operation enforces
+            # precedence (an operation can't start before the previous one on
+            # the same job ends), so this is safe to do back-to-back for one job.
+            for op in job.operations:
+                candidate_machines = self._get_machines_for_workcenter(system, op.workcenter)
+                chosen_machine = self._get_earliest_machine(candidate_machines)
+                self._assign_single_operation(job, op, chosen_machine)
 
             # Remove job from unscheduled pool
             del unscheduled_jobs[job.job_id]

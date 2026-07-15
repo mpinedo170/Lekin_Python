@@ -182,7 +182,11 @@ def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
             machines = []
             schedule['schedule_type'] = line.split(":", 1)[1].strip()
         elif line.startswith("RGB:"):
-            schedule['rgb'] = tuple(map(int, line.split(":", 1)[1].strip().split(";")))
+            rgb_token = line.split(":", 1)[1].strip()
+            # save_schedule_to_seq writes the literal "None" when the
+            # Schedule had no rgb set, so it round-trips back to None
+            # instead of silently becoming (0, 0, 0).
+            schedule['rgb'] = None if rgb_token == "None" else tuple(map(int, rgb_token.split(";")))
         elif line.startswith("Time:"):
             schedule['time'] = int(float(line.split(":", 1)[1].strip()))
         elif line.startswith("Machine:"):
@@ -233,8 +237,11 @@ def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
     with open(filepath, "w") as f:
         # Write schedule header
         f.write(f"Schedule:           {schedule.schedule_type}\n")
-        rgb = getattr(schedule, 'rgb', None) or (0, 0, 0)
-        rgb_str = ";".join(str(x) for x in rgb)
+        rgb = getattr(schedule, 'rgb', None)
+        # Preserve "no rgb set" as the literal word None instead of making up
+        # a (0, 0, 0) default -- that would silently turn into a real black
+        # color on the next parse_seq_file() round-trip.
+        rgb_str = ";".join(str(x) for x in rgb) if rgb is not None else "None"
         f.write(f"  RGB:                {rgb_str}\n")
         f.write(f"  Time:               {schedule.time}\n")
         for machine_schedule in schedule.machines:

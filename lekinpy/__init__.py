@@ -15,6 +15,7 @@ from .exceptions import (
     EmptyMachineListError,
     DuplicateJobIdError,
     DuplicateMachineIdError,
+    DuplicateWorkcenterIdError,
     MissingWorkcenterError,
 )
 from .io import (
@@ -55,6 +56,7 @@ __all__ = [
     "EmptyMachineListError",
     "DuplicateJobIdError",
     "DuplicateMachineIdError",
+    "DuplicateWorkcenterIdError",
     "MissingWorkcenterError",
     # IO helpers
     "export_jobs_to_jobfile",

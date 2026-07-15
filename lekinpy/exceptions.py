@@ -34,5 +34,9 @@ class DuplicateMachineIdError(LekinValidationError):
     """Raised when a machine name is already in use elsewhere in the System."""
 
 
+class DuplicateWorkcenterIdError(LekinValidationError):
+    """Raised when a System already has a workcenter with the given name."""
+
+
 class MissingWorkcenterError(LekinValidationError):
     """Raised when a Job operation references a workcenter the System doesn't have."""

@@ -396,16 +396,21 @@ System()
   `DuplicateJobIdError` if a job with the same `job_id` was already added.
 - `add_workcenter(workcenter: Workcenter) -> None`  
   Add a `Workcenter` to the system. Raises `TypeError` if not a
-  `Workcenter`, or `DuplicateMachineIdError` if one of its machines shares
-  a name with a machine already in the system (from a different workcenter).
+  `Workcenter`, `DuplicateWorkcenterIdError` if a workcenter with the same
+  `name` was already added, or `DuplicateMachineIdError` if one of its
+  machines shares a name with a machine already in the system (from a
+  different workcenter).
 - `set_schedule(schedule: Schedule) -> None`  
   Attach a `Schedule` to the system. Raises `TypeError` if not a `Schedule`.
 - `validate() -> None`  
-  Check that every job operation's `workcenter` references a workcenter
-  actually present in the system. Raises `MissingWorkcenterError` if not.
-  Jobs and workcenters can be added in either order — this is safe to call
-  once the system is fully built, and every built-in `SchedulingAlgorithm`
-  calls it automatically before scheduling (see
+  Defensively re-check every invariant: duplicate job/workcenter/machine
+  ids, empty operations/machine lists, non-positive processing times, and
+  operation→workcenter references. Jobs and workcenters can be added in
+  either order — this is safe to call once the system is fully built.
+  Most of these are already enforced at construction/add time, but
+  attributes are mutable afterwards (e.g. `job.job_id = "..."`), so
+  `validate()` is the comprehensive final gate — every built-in
+  `SchedulingAlgorithm` calls it automatically before scheduling (see
   [SchedulingAlgorithm](#schedulingalgorithm-base)).
 - `to_dict() -> dict[str, Any]`  
   Serialize the entire system, including jobs, workcenters, and schedule.
@@ -456,13 +461,19 @@ when objects are added to it, or by `System.validate()`.
 
 | Exception | Raised by | When |
 |---|---|---|
-| `EmptyOperationsError` | `Job(...)` | `operations` is an empty list |
-| `NonPositiveProcessingTimeError` | `Operation(...)` | `processing_time <= 0` |
-| `EmptyMachineListError` | `Workcenter(...)` | `machines` is an empty list |
-| `DuplicateMachineIdError` | `Workcenter(...)` | two machines in the same list share a name |
-| `DuplicateJobIdError` | `System.add_job(...)` | a job with that `job_id` is already in the system |
-| `DuplicateMachineIdError` | `System.add_workcenter(...)` | a machine name collides with one already in the system |
+| `EmptyOperationsError` | `Job(...)`, `System.validate()` | `operations` is an empty list |
+| `NonPositiveProcessingTimeError` | `Operation(...)`, `System.validate()` | `processing_time <= 0` |
+| `EmptyMachineListError` | `Workcenter(...)`, `System.validate()` | `machines` is an empty list |
+| `DuplicateMachineIdError` | `Workcenter(...)`, `System.add_workcenter(...)`, `System.validate()` | two machines share a name (within one workcenter, or elsewhere in the system) |
+| `DuplicateJobIdError` | `System.add_job(...)`, `System.validate()` | a job with that `job_id` is already in the system |
+| `DuplicateWorkcenterIdError` | `System.add_workcenter(...)`, `System.validate()` | a workcenter with that `name` is already in the system |
 | `MissingWorkcenterError` | `System.validate()` (also called automatically by every `SchedulingAlgorithm` before scheduling) | an operation's `workcenter` string doesn't match any workcenter in the system |
+
+`System.validate()` re-checks all of the above from scratch, not just
+workcenter references — it's the final gate before scheduling, and
+catches invariants broken by mutating an already-inserted object (e.g.
+`job2.job_id = job1.job_id` after both were added) that the constructor
+and `add_job`/`add_workcenter` checks can't see.
 
 **Example**
 ```python
@@ -629,7 +640,8 @@ Save a `Schedule` to a `.seq` file, one `Oper:` line per
 `ScheduledOperation` with the extended
 `job_id;operation_index;start_time;end_time;sequence_position;status`
 format described above. Round-trips losslessly through `parse_seq_file` +
-`Schedule.from_dict`.
+`Schedule.from_dict`, including `rgb=None` (written as the literal `None`
+token, not a fabricated `(0, 0, 0)`).
 
 **Signature**
 ```python

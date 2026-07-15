@@ -6,7 +6,7 @@ __version__ = "0.1.0"
 
 from .job import Job, Operation
 from .machine import Machine, Workcenter
-from .schedule import Schedule, MachineSchedule
+from .schedule import Schedule, MachineSchedule, ScheduledOperation
 from .system import System
 from .io import (
     export_jobs_to_jobfile,
@@ -16,6 +16,7 @@ from .io import (
     parse_mch_file,
     parse_seq_file,
     save_schedule_to_json,
+    load_schedule_from_json,
     save_schedule_to_seq,
     load_jobs_from_json,
     load_workcenters_from_json,
@@ -36,6 +37,7 @@ __all__ = [
     "Workcenter",
     "Schedule",
     "MachineSchedule",
+    "ScheduledOperation",
     "System",
     # IO helpers
     "export_jobs_to_jobfile",
@@ -45,6 +47,7 @@ __all__ = [
     "parse_mch_file",
     "parse_seq_file",
     "save_schedule_to_json",
+    "load_schedule_from_json",
     "save_schedule_to_seq",
     "load_jobs_from_json",
     "load_workcenters_from_json",

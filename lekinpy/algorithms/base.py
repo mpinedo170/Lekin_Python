@@ -1,4 +1,4 @@
-from ..schedule import MachineSchedule, Schedule
+from ..schedule import MachineSchedule, ScheduledOperation, Schedule
 
 class SchedulingAlgorithm:
     """
@@ -14,7 +14,8 @@ class SchedulingAlgorithm:
         # Tracks when each machine will next be available
         self.machine_available_time = {}
 
-        # Stores the list of job IDs assigned to each machine for reporting and visualization
+        # Stores the list of ScheduledOperation records assigned to each machine, in
+        # assignment order, for reporting and visualization
         self.machine_job_map = {}
 
     def prepare(self, system):
@@ -103,8 +104,19 @@ class SchedulingAlgorithm:
         # Update machine's availability
         self._update_machine_time(chosen_machine.name, end_time)
 
-        # Track which job was assigned to which machine
-        self.machine_job_map[chosen_machine.name].append(job.job_id)
+        # Record this operation's placement in the schedule
+        sequence_position = len(self.machine_job_map[chosen_machine.name])
+        scheduled_op = ScheduledOperation(
+            job_id=job.job_id,
+            operation_index=job.operations.index(operation),
+            workcenter=self.machine_workcenter_map.get(chosen_machine.name),
+            machine=chosen_machine.name,
+            start_time=start_time,
+            end_time=end_time,
+            sequence_position=sequence_position,
+            status=operation.status,
+        )
+        self.machine_job_map[chosen_machine.name].append(scheduled_op)
 
     def _get_available_jobs(self, unscheduled_jobs, current_time):
         """

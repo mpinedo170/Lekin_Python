@@ -31,19 +31,15 @@ print("Schedule type:", schedule.schedule_type)
 print("Total time:", schedule.time)
 print("Machine Schedules:")
 for ms in schedule.machines:
-    print(f"{ms.machine}: {ms.operations}")
+    print(f"{ms.machine}: {[so.job_id for so in ms.operations]}")
 
 # 6. Print Gantt Chart
 print("\nGantt Chart:")
 timeline = []
 for ms in schedule.machines:
     line = f"{ms.machine}: "
-    time_marker = 0
-    for job_id in ms.operations:
-        job = next(j for j in system.jobs if j.job_id == job_id)
-        duration = job.operations[0].processing_time
-        line += f"[{job_id} | {time_marker}-{time_marker + duration}] "
-        time_marker += duration
+    for so in ms.operations:
+        line += f"[{so.job_id} | {so.start_time}-{so.end_time}] "
     timeline.append(line)
 
 print("\n".join(timeline))
@@ -60,13 +56,10 @@ for i, ms in enumerate(schedule.machines):
     y = i
     yticks.append(y)
     yticklabels.append(ms.machine)
-    time_marker = 0
-    for job_id in ms.operations:
-        job = next(j for j in system.jobs if j.job_id == job_id)
-        duration = job.operations[0].processing_time
-        ax.barh(y, duration, left=time_marker, color=colors.get(job_id, 'gray'), edgecolor='black')
-        ax.text(time_marker + duration/2, y, job_id, ha='center', va='center', color='white', fontsize=10)
-        time_marker += duration
+    for so in ms.operations:
+        duration = so.end_time - so.start_time
+        ax.barh(y, duration, left=so.start_time, color=colors.get(so.job_id, 'gray'), edgecolor='black')
+        ax.text(so.start_time + duration/2, y, so.job_id, ha='center', va='center', color='white', fontsize=10)
 
 ax.set_yticks(yticks)
 ax.set_yticklabels(yticklabels)

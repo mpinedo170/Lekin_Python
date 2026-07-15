@@ -1,6 +1,8 @@
 import random
 from typing import Any, Dict, List, Optional, Tuple
 
+from .exceptions import DuplicateMachineIdError, EmptyMachineListError
+
 class Machine:
     def __init__(self, name: str, release: float, status: str) -> None:
         if not isinstance(name, str):
@@ -59,6 +61,15 @@ class Workcenter:
             raise TypeError("machines must be a list of Machine instances")
         if rgb is not None and (not isinstance(rgb, tuple) or len(rgb) != 3 or not all(isinstance(c, int) for c in rgb)):
             raise TypeError("rgb must be a tuple of three integers")
+        if not machines:
+            raise EmptyMachineListError(f"Workcenter '{name}' must have at least one machine")
+        seen_names = set()
+        for m in machines:
+            if m.name in seen_names:
+                raise DuplicateMachineIdError(
+                    f"Workcenter '{name}' has more than one machine named '{m.name}'"
+                )
+            seen_names.add(m.name)
         self.name: str = name
         self.release: float = float(release)
         self.status: str = status

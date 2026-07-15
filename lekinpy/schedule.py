@@ -118,43 +118,49 @@ class Schedule:
         for ms in self.machines:
             print(f"{ms.machine}: {[so.job_id for so in ms.operations]}")
 
+    def _operations_by_job(self) -> Dict[str, List['ScheduledOperation']]:
+        """
+        Group every ScheduledOperation in this schedule by job_id, in no
+        particular order. Callers that need per-job ordering should sort by
+        `operation_index`.
+        """
+        ops_by_job: Dict[str, List['ScheduledOperation']] = {}
+        for ms in self.machines:
+            for so in ms.operations:
+                ops_by_job.setdefault(so.job_id, []).append(so)
+        return ops_by_job
+
     def display_job_details(self, system: Any) -> None:
         print("\nDetailed Job Schedule:")
         print(f"{'ID':<6} {'Wght':<5} {'Rls':<4} {'Due':<4} {'Pr.tm.':<7} {'Stat.':<6} {'Bgn':<4} {'End':<4} {'T':<4} {'wT':<4}")
-        job_timings: Dict[str, Tuple[int, int]] = {}
 
-        # Collect timings per job from the schedule, respecting job release time
-        for ms in self.machines:
-            machine_time = 0  # assuming scheduling starts at time 1
-            for so in ms.operations:
-                job_id = so.job_id
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                release = job.release
-                duration = job.operations[0].processing_time
-                start_time = max(release, machine_time)
-                end_time = start_time + duration
-                job_timings[job_id] = (start_time, end_time)
-                machine_time = end_time
+        ops_by_job = self._operations_by_job()
 
         for job in system.jobs:
-            job_id = job.job_id
+            job_ops = sorted(ops_by_job.get(job.job_id, []), key=lambda so: so.operation_index)
+            if not job_ops:
+                continue
             weight = job.weight
             release = job.release
             due = job.due
-            duration = job.operations[0].processing_time
-            status = job.operations[0].status
-            bgn, end = job_timings.get(job_id, (None, None))
-            if bgn is not None:
-                T = end - due  # If this is negative this is zero
-                T = max(T, 0)  # Ensure T is not negative
-                wT = T * weight
-                print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
+            # Job begins when its first operation starts and ends when its
+            # last operation ends; total processing time is the sum of each
+            # operation's own duration (idle time between operations, if
+            # any, isn't counted as processing time).
+            bgn = job_ops[0].start_time
+            end = job_ops[-1].end_time
+            duration = sum(so.end_time - so.start_time for so in job_ops)
+            status = job_ops[-1].status
+            T = max(end - due, 0)  # Tardiness; never negative
+            wT = T * weight
+            print(f"{job.job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
 
     def plot_gantt_chart(self, system: Any) -> None:
         import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(figsize=(10, 4))
         colors = {job.job_id: f"C{i}" for i, job in enumerate(system.jobs)}
+        job_op_counts = {job.job_id: len(job.operations) for job in system.jobs}
 
         yticks: List[int] = []
         yticklabels: List[str] = []
@@ -163,17 +169,14 @@ class Schedule:
             y = i
             yticks.append(y)
             yticklabels.append(ms.machine)
-            machine_time = 0
             for so in ms.operations:
-                job_id = so.job_id
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                release = job.release
-                duration = job.operations[0].processing_time
-                start_time = max(release, machine_time)
-                end_time = start_time + duration
-                ax.barh(y, duration, left=start_time, color=colors.get(job_id, 'gray'), edgecolor='black')
-                ax.text(start_time + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
-                machine_time = end_time
+                duration = so.end_time - so.start_time
+                # For multi-operation jobs, disambiguate which operation this
+                # bar represents (e.g. "J1.2"); single-operation jobs just
+                # show the job id, matching the prior label format.
+                label = so.job_id if job_op_counts.get(so.job_id, 1) <= 1 else f"{so.job_id}.{so.operation_index}"
+                ax.barh(y, duration, left=so.start_time, color=colors.get(so.job_id, 'gray'), edgecolor='black')
+                ax.text(so.start_time + duration / 2, y, label, ha='center', va='center', color='white', fontsize=10)
 
         ax.set_yticks(yticks)
         ax.set_yticklabels(yticklabels)
@@ -188,26 +191,22 @@ class Schedule:
         print(f"{'Mch/Job':<8} {'Setup':<6} {'Start':<6} {'Stop':<6} {'Pr.tm.':<6}")
         for ms in self.machines:
             print(f"{ms.machine:<8}")
-            time_marker = 0
             for so in ms.operations:
-                job_id = so.job_id
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                pr_tm = job.operations[0].processing_time
+                pr_tm = so.end_time - so.start_time
                 setup = 0  # assuming 0 setup time
-                start = time_marker
-                stop = start + pr_tm
-                print(f"  {job_id:<6} {setup:<6} {start:<6} {stop:<6} {pr_tm:<6}")
-                time_marker = stop
+                print(f"  {so.job_id:<6} {setup:<6} {so.start_time:<6} {so.end_time:<6} {pr_tm:<6}")
 
     def display_summary(self, system: Any) -> None:
+        ops_by_job = self._operations_by_job()
         start_times, end_times, T_list, wT_list, C_list, wC_list, U_list = [], [], [], [], [], [], []
 
         for job in system.jobs:
-            start = getattr(job, 'start_time', None)
-            end = getattr(job, 'end_time', None)
+            job_ops = ops_by_job.get(job.job_id)
             due = job.due
             weight = job.weight
-            if start is not None and end is not None:
+            if job_ops:
+                start = min(so.start_time for so in job_ops)
+                end = max(so.end_time for so in job_ops)
                 T = max(0, end - due)
                 T_list.append(T)
                 wT_list.append(T * weight)

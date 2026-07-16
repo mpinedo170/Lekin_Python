@@ -2,6 +2,13 @@ from .base import SchedulingAlgorithm
 from ..schedule import Schedule
 
 class EDDAlgorithm(SchedulingAlgorithm):
+    metadata = {
+        "id": "edd",
+        "display_name": "Earliest Due Date",
+        "supports_multi_operation": True,
+        "version": "1.0.0",
+    }
+
     def schedule(self, system):
         def edd_selector_function(jobs):
             """

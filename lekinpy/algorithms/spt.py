@@ -2,6 +2,13 @@ from .base import SchedulingAlgorithm
 from ..schedule import Schedule
 
 class SPTAlgorithm(SchedulingAlgorithm):
+    metadata = {
+        "id": "spt",
+        "display_name": "Shortest Processing Time",
+        "supports_multi_operation": True,
+        "version": "1.0.0",
+    }
+
     def schedule(self, system):
         def spt_selector_function(jobs):
             """

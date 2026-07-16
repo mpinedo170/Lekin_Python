@@ -3,6 +3,7 @@ import os
 import tempfile
 from .job import Job
 from .machine import Workcenter, Machine
+from .schedule import Schedule
 from typing import Any, List, Dict
 
 # ---- internal helpers for integer-only semantics ----
@@ -49,6 +50,12 @@ def load_workcenters_from_json(filepath: str) -> List[Workcenter]:
 def save_schedule_to_json(schedule: Any, path: str) -> None:
     with open(path, 'w') as f:
         json.dump(schedule.to_dict(), f, indent=2)
+
+
+def load_schedule_from_json(filepath: str) -> Schedule:
+    with open(filepath) as f:
+        data = json.load(f)
+    return Schedule.from_dict(data)
 
 
 def parse_job_file(filepath: str) -> List[Job]:
@@ -151,6 +158,14 @@ def parse_mch_file(filepath: str) -> List[Workcenter]:
 
 
 def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
+    """
+    Parse a .seq file into a list of schedule dicts compatible with
+    Schedule.from_dict(). Each "Oper:" line may be either:
+      - the original LEKIN format: a bare job id (e.g. "J01"), in which case
+        only job_id/workcenter/machine/sequence_position can be recovered, or
+      - this library's extended format written by save_schedule_to_seq:
+        "job_id;operation_index;start_time;end_time;sequence_position;status"
+    """
     schedules: List[Dict[str, Any]] = []
     with open(filepath) as f:
         lines = f.readlines()
@@ -165,19 +180,51 @@ def parse_seq_file(filepath: str) -> List[Dict[str, Any]]:
                 schedules.append(schedule)
             schedule = {}
             machines = []
-            schedule['schedule_type'] = line.split(":")[1].strip()
+            schedule['schedule_type'] = line.split(":", 1)[1].strip()
         elif line.startswith("RGB:"):
-            schedule['rgb'] = tuple(map(int, line.split(":")[1].strip().split(";")))
+            rgb_token = line.split(":", 1)[1].strip()
+            # save_schedule_to_seq writes the literal "None" when the
+            # Schedule had no rgb set, so it round-trips back to None
+            # instead of silently becoming (0, 0, 0).
+            schedule['rgb'] = None if rgb_token == "None" else tuple(map(int, rgb_token.split(";")))
         elif line.startswith("Time:"):
-            schedule['time'] = int(line.split(":")[1].strip())
+            schedule['time'] = int(float(line.split(":", 1)[1].strip()))
         elif line.startswith("Machine:"):
             if machine:
                 machines.append(machine)
-            parts = line.split(":")[1].strip().split(";")
-            machine = {'workcenter': parts[0], 'machine': parts[1], 'operations': []}
+            parts = line.split(":", 1)[1].strip().split(";")
+            if len(parts) >= 2:
+                wc_name, machine_name = parts[0], parts[1]
+            else:
+                wc_name, machine_name = None, parts[0]
+            machine = {'workcenter': wc_name, 'machine': machine_name, 'operations': []}
         elif line.startswith("Oper:"):
-            job_id = line.split(":")[1].strip()
-            machine['operations'].append(job_id)
+            parts = line.split(":", 1)[1].strip().split(";")
+            seq_pos = len(machine['operations'])
+            if len(parts) >= 6:
+                op = {
+                    'job_id': parts[0],
+                    'operation_index': int(parts[1]),
+                    'workcenter': machine['workcenter'],
+                    'machine': machine['machine'],
+                    'start_time': float(parts[2]),
+                    'end_time': float(parts[3]),
+                    'sequence_position': int(parts[4]),
+                    'status': parts[5],
+                }
+            else:
+                # Bare job id, original LEKIN format: timing/operation-index unknown.
+                op = {
+                    'job_id': parts[0],
+                    'operation_index': None,
+                    'workcenter': machine['workcenter'],
+                    'machine': machine['machine'],
+                    'start_time': None,
+                    'end_time': None,
+                    'sequence_position': seq_pos,
+                    'status': None,
+                }
+            machine['operations'].append(op)
     if machine:
         machines.append(machine)
     if schedule:
@@ -190,14 +237,22 @@ def save_schedule_to_seq(schedule: Any, filepath: str) -> None:
     with open(filepath, "w") as f:
         # Write schedule header
         f.write(f"Schedule:           {schedule.schedule_type}\n")
-        rgb_str = ";".join(str(x) for x in schedule.rgb)
+        rgb = getattr(schedule, 'rgb', None)
+        # Preserve "no rgb set" as the literal word None instead of making up
+        # a (0, 0, 0) default -- that would silently turn into a real black
+        # color on the next parse_seq_file() round-trip.
+        rgb_str = ";".join(str(x) for x in rgb) if rgb is not None else "None"
         f.write(f"  RGB:                {rgb_str}\n")
         f.write(f"  Time:               {schedule.time}\n")
         for machine_schedule in schedule.machines:
             # Write both workcenter and machine name separated by semicolon
             f.write(f"  Machine:            {machine_schedule.workcenter};{machine_schedule.machine}\n")
-            for job_id in machine_schedule.operations:
-                f.write(f"    Oper:               {job_id}\n")
+            for op in machine_schedule.operations:
+                f.write(
+                    "    Oper:               "
+                    f"{op.job_id};{op.operation_index};{op.start_time};{op.end_time};"
+                    f"{op.sequence_position};{op.status}\n"
+                )
 
 
 

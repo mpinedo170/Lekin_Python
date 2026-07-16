@@ -2,6 +2,13 @@ from .base import SchedulingAlgorithm
 from ..schedule import Schedule, MachineSchedule
 
 class FCFSAlgorithm(SchedulingAlgorithm):
+    metadata = {
+        "id": "fcfs",
+        "display_name": "First-Come, First-Served",
+        "supports_multi_operation": True,
+        "version": "1.0.0",
+    }
+
     def schedule(self, system):
         self.prepare(system)
 

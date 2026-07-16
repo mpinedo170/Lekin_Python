@@ -1,82 +1,172 @@
 from typing import Any, Dict, List, Optional, Tuple
 
-class MachineSchedule:
-    def __init__(self, workcenter: Optional[str], machine: str, operations: List[str]) -> None:
+class ScheduledOperation:
+    """
+    A single operation's placement in the final schedule: which job/operation
+    it is, where it runs, when it runs, and where it falls in the machine's
+    sequence. This is the unit of data that MachineSchedule stores, replacing
+    the old bare job-id strings.
+    """
+    def __init__(
+        self,
+        job_id: str,
+        operation_index: int,
+        workcenter: Optional[str],
+        machine: str,
+        start_time: float,
+        end_time: float,
+        sequence_position: int,
+        status: Optional[str] = None,
+    ) -> None:
+        self.job_id: str = job_id
+        self.operation_index: int = operation_index
         self.workcenter: Optional[str] = workcenter
         self.machine: str = machine
-        self.operations: List[str] = operations  # List of job_ids
+        self.start_time: float = start_time
+        self.end_time: float = end_time
+        self.sequence_position: int = sequence_position
+        self.status: Optional[str] = status
+
+    def __repr__(self) -> str:
+        return (
+            f"ScheduledOperation({self.job_id}, op={self.operation_index}, "
+            f"{self.workcenter}, {self.machine}, {self.start_time}-{self.end_time}, "
+            f"seq={self.sequence_position}, status={self.status})"
+        )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            'job_id': self.job_id,
+            'operation_index': self.operation_index,
+            'workcenter': self.workcenter,
+            'machine': self.machine,
+            'start_time': self.start_time,
+            'end_time': self.end_time,
+            'sequence_position': self.sequence_position,
+            'status': self.status,
+        }
+
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> 'ScheduledOperation':
+        return ScheduledOperation(
+            job_id=data['job_id'],
+            operation_index=data['operation_index'],
+            workcenter=data.get('workcenter'),
+            machine=data['machine'],
+            start_time=data['start_time'],
+            end_time=data['end_time'],
+            sequence_position=data['sequence_position'],
+            status=data.get('status'),
+        )
+
+class MachineSchedule:
+    def __init__(self, workcenter: Optional[str], machine: str, operations: List[ScheduledOperation]) -> None:
+        self.workcenter: Optional[str] = workcenter
+        self.machine: str = machine
+        self.operations: List[ScheduledOperation] = operations
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'workcenter': self.workcenter,
             'machine': self.machine,
-            'operations': self.operations
+            'operations': [op.to_dict() for op in self.operations]
         }
 
+    @staticmethod
+    def from_dict(data: Dict[str, Any]) -> 'MachineSchedule':
+        operations = [ScheduledOperation.from_dict(op) for op in data.get('operations', [])]
+        return MachineSchedule(
+            workcenter=data.get('workcenter'),
+            machine=data['machine'],
+            operations=operations
+        )
+
 class Schedule:
-    def __init__(self, schedule_type: str, time: int, machines: List[MachineSchedule]) -> None:
+    def __init__(
+        self,
+        schedule_type: str,
+        time: int,
+        machines: List[MachineSchedule],
+        rgb: Optional[Tuple[int, int, int]] = None,
+    ) -> None:
         self.schedule_type: str = schedule_type
         self.time: int = time
         self.machines: List[MachineSchedule] = machines
+        self.rgb: Optional[Tuple[int, int, int]] = rgb
 
     def to_dict(self) -> Dict[str, Any]:
         return {
             'schedule_type': self.schedule_type,
             'time': self.time,
+            'rgb': self.rgb,
             'machines': [m.to_dict() for m in self.machines]
         }
 
     @staticmethod
     def from_dict(data: Dict[str, Any]) -> 'Schedule':
-        machines = [MachineSchedule(**m) for m in data.get('machines', [])]
+        machines = [MachineSchedule.from_dict(m) for m in data.get('machines', [])]
+        # JSON has no tuple type, so a schedule round-tripped through
+        # to_dict()/json.dump/json.load comes back with rgb as a list, not a
+        # tuple. Normalize it back so `Schedule.from_dict(json.loads(...))`
+        # round-trips to an equal (not just equal-valued) rgb.
+        rgb_data = data.get('rgb')
+        rgb = tuple(rgb_data) if rgb_data is not None else None
         return Schedule(
             schedule_type=data['schedule_type'],
             time=data['time'],
-            machines=machines
+            machines=machines,
+            rgb=rgb,
         )
 
     def display_machine_details(self) -> None:
         print("Schedule type:", self.schedule_type)
         print("Total time:", self.time)
         for ms in self.machines:
-            print(f"{ms.machine}: {ms.operations}")
+            print(f"{ms.machine}: {[so.job_id for so in ms.operations]}")
+
+    def _operations_by_job(self) -> Dict[str, List['ScheduledOperation']]:
+        """
+        Group every ScheduledOperation in this schedule by job_id, in no
+        particular order. Callers that need per-job ordering should sort by
+        `operation_index`.
+        """
+        ops_by_job: Dict[str, List['ScheduledOperation']] = {}
+        for ms in self.machines:
+            for so in ms.operations:
+                ops_by_job.setdefault(so.job_id, []).append(so)
+        return ops_by_job
 
     def display_job_details(self, system: Any) -> None:
         print("\nDetailed Job Schedule:")
         print(f"{'ID':<6} {'Wght':<5} {'Rls':<4} {'Due':<4} {'Pr.tm.':<7} {'Stat.':<6} {'Bgn':<4} {'End':<4} {'T':<4} {'wT':<4}")
-        job_timings: Dict[str, Tuple[int, int]] = {}
 
-        # Collect timings per job from the schedule, respecting job release time
-        for ms in self.machines:
-            machine_time = 0  # assuming scheduling starts at time 1
-            for job_id in ms.operations:
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                release = job.release
-                duration = job.operations[0].processing_time
-                start_time = max(release, machine_time)
-                end_time = start_time + duration
-                job_timings[job_id] = (start_time, end_time)
-                machine_time = end_time
+        ops_by_job = self._operations_by_job()
 
         for job in system.jobs:
-            job_id = job.job_id
+            job_ops = sorted(ops_by_job.get(job.job_id, []), key=lambda so: so.operation_index)
+            if not job_ops:
+                continue
             weight = job.weight
             release = job.release
             due = job.due
-            duration = job.operations[0].processing_time
-            status = job.operations[0].status
-            bgn, end = job_timings.get(job_id, (None, None))
-            if bgn is not None:
-                T = end - due  # If this is negative this is zero
-                T = max(T, 0)  # Ensure T is not negative
-                wT = T * weight
-                print(f"{job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
+            # Job begins when its first operation starts and ends when its
+            # last operation ends; total processing time is the sum of each
+            # operation's own duration (idle time between operations, if
+            # any, isn't counted as processing time).
+            bgn = job_ops[0].start_time
+            end = job_ops[-1].end_time
+            duration = sum(so.end_time - so.start_time for so in job_ops)
+            status = job_ops[-1].status
+            T = max(end - due, 0)  # Tardiness; never negative
+            wT = T * weight
+            print(f"{job.job_id:<6} {weight:<5} {release:<4} {due:<4} {duration:<7} {status:<6} {bgn:<4} {end:<4} {T:<4} {wT:<4}")
 
     def plot_gantt_chart(self, system: Any) -> None:
         import matplotlib.pyplot as plt
 
         fig, ax = plt.subplots(figsize=(10, 4))
         colors = {job.job_id: f"C{i}" for i, job in enumerate(system.jobs)}
+        job_op_counts = {job.job_id: len(job.operations) for job in system.jobs}
 
         yticks: List[int] = []
         yticklabels: List[str] = []
@@ -85,16 +175,14 @@ class Schedule:
             y = i
             yticks.append(y)
             yticklabels.append(ms.machine)
-            machine_time = 0
-            for job_id in ms.operations:
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                release = job.release
-                duration = job.operations[0].processing_time
-                start_time = max(release, machine_time)
-                end_time = start_time + duration
-                ax.barh(y, duration, left=start_time, color=colors.get(job_id, 'gray'), edgecolor='black')
-                ax.text(start_time + duration / 2, y, job_id, ha='center', va='center', color='white', fontsize=10)
-                machine_time = end_time
+            for so in ms.operations:
+                duration = so.end_time - so.start_time
+                # For multi-operation jobs, disambiguate which operation this
+                # bar represents (e.g. "J1.2"); single-operation jobs just
+                # show the job id, matching the prior label format.
+                label = so.job_id if job_op_counts.get(so.job_id, 1) <= 1 else f"{so.job_id}.{so.operation_index}"
+                ax.barh(y, duration, left=so.start_time, color=colors.get(so.job_id, 'gray'), edgecolor='black')
+                ax.text(so.start_time + duration / 2, y, label, ha='center', va='center', color='white', fontsize=10)
 
         ax.set_yticks(yticks)
         ax.set_yticklabels(yticklabels)
@@ -109,25 +197,22 @@ class Schedule:
         print(f"{'Mch/Job':<8} {'Setup':<6} {'Start':<6} {'Stop':<6} {'Pr.tm.':<6}")
         for ms in self.machines:
             print(f"{ms.machine:<8}")
-            time_marker = 0
-            for job_id in ms.operations:
-                job = next(j for j in system.jobs if j.job_id == job_id)
-                pr_tm = job.operations[0].processing_time
+            for so in ms.operations:
+                pr_tm = so.end_time - so.start_time
                 setup = 0  # assuming 0 setup time
-                start = time_marker
-                stop = start + pr_tm
-                print(f"  {job_id:<6} {setup:<6} {start:<6} {stop:<6} {pr_tm:<6}")
-                time_marker = stop
+                print(f"  {so.job_id:<6} {setup:<6} {so.start_time:<6} {so.end_time:<6} {pr_tm:<6}")
 
     def display_summary(self, system: Any) -> None:
+        ops_by_job = self._operations_by_job()
         start_times, end_times, T_list, wT_list, C_list, wC_list, U_list = [], [], [], [], [], [], []
 
         for job in system.jobs:
-            start = getattr(job, 'start_time', None)
-            end = getattr(job, 'end_time', None)
+            job_ops = ops_by_job.get(job.job_id)
             due = job.due
             weight = job.weight
-            if start is not None and end is not None:
+            if job_ops:
+                start = min(so.start_time for so in job_ops)
+                end = max(so.end_time for so in job_ops)
                 T = max(0, end - due)
                 T_list.append(T)
                 wT_list.append(T * weight)

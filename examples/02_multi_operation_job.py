@@ -50,15 +50,11 @@ system.add_job(
 
 system.validate()
 schedule = FCFSAlgorithm().schedule(system)
+system.set_schedule(schedule)
 
-print(f"Makespan: {schedule.time}\n")
-for machine_schedule in schedule.machines:
-    print(f"{machine_schedule.machine}:")
-    for operation in machine_schedule.operations:
-        print(
-            f"  {operation.job_id}, operation {operation.operation_index}: "
-            f"{operation.start_time} -> {operation.end_time}"
-        )
-
-print("\nNotice that operation 1 of each job starts only after operation 0 ends.")
-
+# These reports read the authoritative ScheduledOperation records. The
+# sequence report makes the two operations and their precedence easy to see.
+schedule.display_machine_details()
+schedule.display_job_details(system)
+schedule.display_sequence(system)
+schedule.display_summary(system)

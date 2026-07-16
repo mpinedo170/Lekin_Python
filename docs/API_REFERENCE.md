@@ -303,13 +303,17 @@ MachineSchedule(workcenter: Optional[str], machine: str, operations: list[Schedu
 
 **Example**
 ```python
-from lekinpy.schedule import MachineSchedule, ScheduledOperation
+from lekinpy.schedule import MachineSchedule, Schedule, ScheduledOperation
 ms = MachineSchedule(workcenter="W01", machine="A1", operations=[
     ScheduledOperation("J1", 0, "W01", "A1", 0, 5, 0, "A"),
     ScheduledOperation("J2", 0, "W01", "A1", 5, 8, 1, "A"),
 ])
-print(ms.to_dict())
+schedule = Schedule("Example", time=8, machines=[ms])
+schedule.display_machine_details()
 ```
+
+Use `ms.to_dict()` when you need structured serialization data; use the
+`Schedule.display_*` methods for human-readable console output.
 
 ---
 
@@ -445,8 +449,14 @@ sched = Schedule("FCFS", time=5, machines=[
 ])
 sys.set_schedule(sched)
 
-print(sys.to_dict())
+sys.schedule.display_machine_details()
+sys.schedule.display_job_details(sys)
+sys.schedule.display_sequence(sys)
+sys.schedule.display_summary(sys)
 ```
+
+Use `sys.to_dict()` for serialization rather than human-readable console
+output.
 
 ---
 
@@ -814,6 +824,7 @@ SPTAlgorithm().schedule(system: System) -> Schedule
 ```python
 from lekinpy.algorithms import SPTAlgorithm
 sched = SPTAlgorithm().schedule(system)
+sched.display_machine_details()
 ```
 
 ---
@@ -832,6 +843,7 @@ EDDAlgorithm().schedule(system: System) -> Schedule
 ```python
 from lekinpy.algorithms import EDDAlgorithm
 sched = EDDAlgorithm().schedule(system)
+sched.display_machine_details()
 ```
 
 ---
@@ -850,6 +862,7 @@ WSPTAlgorithm().schedule(system: System) -> Schedule
 ```python
 from lekinpy.algorithms import WSPTAlgorithm
 sched = WSPTAlgorithm().schedule(system)
+sched.display_machine_details()
 ```
 
 ---
@@ -904,6 +917,10 @@ sys.add_job(Job("J1", 0, 10, 1, [Operation("W01", 5, "A")]))
 algo = MyRule()
 schedule = algo.schedule(sys)
 sys.set_schedule(schedule)
+schedule.display_machine_details()
+schedule.display_job_details(sys)
+schedule.display_sequence(sys)
+schedule.display_summary(sys)
 ```
 
 ### Multi-Operation Jobs

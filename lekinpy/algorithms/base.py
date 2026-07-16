@@ -1,27 +1,69 @@
-from ..schedule import MachineSchedule, Schedule
+from ..schedule import MachineSchedule, ScheduledOperation, Schedule
 
 class SchedulingAlgorithm:
     """
-    Base class for scheduling algorithms.
-    Provides shared methods and structures for machine assignment,
-    tracking availability, and dynamic scheduling.
+    Base class for scheduling algorithms, and the extension point for adding
+    new ones.
+
+    Provides shared methods and structures for machine assignment, tracking
+    availability, and dynamic scheduling.
+
+    To add a new algorithm:
+      1. Subclass SchedulingAlgorithm.
+      2. Implement schedule(self, system) -> Schedule.
+      3. Set the `metadata` class attribute to a dict with these keys:
+           - "id": short unique string identifier, e.g. "fcfs"
+           - "display_name": human-readable name, e.g.
+             "First-Come, First-Served"
+           - "supports_multi_operation": bool -- whether schedule() actually
+             routes every operation of a multi-operation job (not just the
+             first)
+           - "version": version string for this algorithm's implementation,
+             e.g. "1.0.0"
+
+    This is a convention enforced at instantiation time (missing metadata
+    raises NotImplementedError), not a plugin registry: there's no
+    decorator or entry-point discovery mechanism. Callers import and
+    instantiate the algorithm class they want directly, e.g.
+    `FCFSAlgorithm().schedule(system)`.
     """
 
+    #: Subclasses must override this with their own metadata dict (see
+    #: the class docstring for the required keys).
+    metadata = {}
+
+    _REQUIRED_METADATA_KEYS = {"id", "display_name", "supports_multi_operation", "version"}
+
     def __init__(self):
+        missing_keys = self._REQUIRED_METADATA_KEYS - self.metadata.keys()
+        if missing_keys:
+            raise NotImplementedError(
+                f"{type(self).__name__} must set a 'metadata' class attribute "
+                f"with keys {sorted(self._REQUIRED_METADATA_KEYS)}; "
+                f"missing {sorted(missing_keys)}"
+            )
+
         # Maps each machine's name to its corresponding workcenter name
         self.machine_workcenter_map = {}
 
         # Tracks when each machine will next be available
         self.machine_available_time = {}
 
-        # Stores the list of job IDs assigned to each machine for reporting and visualization
+        # Stores the list of ScheduledOperation records assigned to each machine, in
+        # assignment order, for reporting and visualization
         self.machine_job_map = {}
 
     def prepare(self, system):
         """
-        Prepares internal state: maps machines to workcenters, 
+        Prepares internal state: maps machines to workcenters,
         sets initial machine availability, and initializes job mapping.
         """
+        # Fail early and clearly (e.g. MissingWorkcenterError) rather than
+        # letting a bad reference surface later as a confusing crash inside
+        # _get_earliest_machine (min() on an empty candidate-machines list).
+        if hasattr(system, 'validate'):
+            system.validate()
+
         self.machine_workcenter_map = {}
 
         # Initialize machine availability to their release times (or zero by default)
@@ -103,8 +145,19 @@ class SchedulingAlgorithm:
         # Update machine's availability
         self._update_machine_time(chosen_machine.name, end_time)
 
-        # Track which job was assigned to which machine
-        self.machine_job_map[chosen_machine.name].append(job.job_id)
+        # Record this operation's placement in the schedule
+        sequence_position = len(self.machine_job_map[chosen_machine.name])
+        scheduled_op = ScheduledOperation(
+            job_id=job.job_id,
+            operation_index=job.operations.index(operation),
+            workcenter=self.machine_workcenter_map.get(chosen_machine.name),
+            machine=chosen_machine.name,
+            start_time=start_time,
+            end_time=end_time,
+            sequence_position=sequence_position,
+            status=operation.status,
+        )
+        self.machine_job_map[chosen_machine.name].append(scheduled_op)
 
     def _get_available_jobs(self, unscheduled_jobs, current_time):
         """
@@ -180,15 +233,15 @@ class SchedulingAlgorithm:
             # Use the algorithm-specific selection rule to pick one job from available ones
             job = job_selector_fn(available_jobs)
 
-            # Select the first operation (assuming single-operation jobs for now)
-            op = job.operations[0]
-
-            # Find eligible machines for this operation and pick the earliest one
-            candidate_machines = self._get_machines_for_workcenter(system, op.workcenter)
-            chosen_machine = self._get_earliest_machine(candidate_machines)
-
-            # Assign operation to the chosen machine
-            self._assign_single_operation(job, op, chosen_machine)
+            # Schedule every operation of the selected job, in order, same as
+            # FCFSAlgorithm: for each operation find the earliest-available
+            # eligible machine and assign it. _assign_single_operation enforces
+            # precedence (an operation can't start before the previous one on
+            # the same job ends), so this is safe to do back-to-back for one job.
+            for op in job.operations:
+                candidate_machines = self._get_machines_for_workcenter(system, op.workcenter)
+                chosen_machine = self._get_earliest_machine(candidate_machines)
+                self._assign_single_operation(job, op, chosen_machine)
 
             # Remove job from unscheduled pool
             del unscheduled_jobs[job.job_id]

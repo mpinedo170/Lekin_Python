@@ -16,3 +16,4 @@ lekinpy.egg-info/
 .vscode/
 .venv-test/
 .venv-test
+lekin-library_DECISIONS.md

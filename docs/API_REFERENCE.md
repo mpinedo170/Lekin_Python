@@ -1,4 +1,4 @@
-# lekinpy — Reference
+# lekinpy - Reference
 
 <!--
 Main reference for the lekinpy library (v0.1.0).
@@ -233,7 +233,7 @@ wc2 = Workcenter.from_dict(wc_dict)
 ### ScheduledOperation
 Represents a single operation's placement in a finished schedule: which
 job/operation it is, where it runs, when it runs, and where it falls in the
-machine's sequence. This is the unit of data `MachineSchedule` stores — one
+machine's sequence. This is the unit of data `MachineSchedule` stores - one
 record per operation, not one bare job-id string per job.
 
 **Constructor**
@@ -250,7 +250,7 @@ ScheduledOperation(
 )
 ```
 - **job_id** (`str`): Which job this operation belongs to.
-- **operation_index** (`int`): Index into that job's `operations` list —
+- **operation_index** (`int`): Index into that job's `operations` list -
   needed because a job's operations may run on different machines, or even
   revisit the same machine, so `job_id` alone doesn't identify *which*
   operation this is.
@@ -291,7 +291,7 @@ MachineSchedule(workcenter: Optional[str], machine: str, operations: list[Schedu
 - **operations** (`list[ScheduledOperation]`): Every operation scheduled
   on this machine, in run order. A job with multiple operations on this
   machine (or spread across several machines) appears once per operation,
-  not once per job — read `operation_index` to tell them apart.
+  not once per job - read `operation_index` to tell them apart.
 
 **Static Methods**
 - `from_dict(data: Dict[str, Any]) -> MachineSchedule`
@@ -320,7 +320,7 @@ Use `ms.to_dict()` when you need structured serialization data; use the
 ### Schedule
 Represents a full scheduling result across machines, including display and
 plotting utilities. All of the display/plotting methods below read timing
-directly from each machine's `ScheduledOperation` records — nothing is
+directly from each machine's `ScheduledOperation` records - nothing is
 recomputed from `job.operations[0]` on the fly, so they give correct
 results for multi-operation jobs and work the same whether the `Schedule`
 was just computed or loaded back from JSON/`.seq`.
@@ -343,7 +343,7 @@ Schedule(
 **Static Methods**
 - `from_dict(data: dict[str, Any]) -> Schedule`  
   Rebuild a `Schedule` (and its nested `MachineSchedule`/`ScheduledOperation`
-  objects) from serialized data — works with dicts produced by either
+  objects) from serialized data - works with dicts produced by either
   `to_dict()` or `parse_seq_file()`.
 
 **Instance Methods**
@@ -409,10 +409,10 @@ System()
   Defensively re-check every invariant: duplicate job/workcenter/machine
   ids, empty operations/machine lists, non-positive processing times, and
   operation→workcenter references. Jobs and workcenters can be added in
-  either order — this is safe to call once the system is fully built.
+  either order - this is safe to call once the system is fully built.
   Most of these are already enforced at construction/add time, but
   attributes are mutable afterwards (e.g. `job.job_id = "..."`), so
-  `validate()` is the comprehensive final gate — every built-in
+  `validate()` is the comprehensive final gate - every built-in
   `SchedulingAlgorithm` calls it automatically before scheduling (see
   [SchedulingAlgorithm](#schedulingalgorithm-base)).
 - `to_dict() -> dict[str, Any]`  
@@ -479,7 +479,7 @@ when objects are added to it, or by `System.validate()`.
 | `MissingWorkcenterError` | `System.validate()` (also called automatically by every `SchedulingAlgorithm` before scheduling) | an operation's `workcenter` string doesn't match any workcenter in the system |
 
 `System.validate()` re-checks all of the above from scratch, not just
-workcenter references — it's the final gate before scheduling, and
+workcenter references - it's the final gate before scheduling, and
 catches invariants broken by mutating an already-inserted object (e.g.
 `job2.job_id = job1.job_id` after both were added) that the constructor
 and `add_job`/`add_workcenter` checks can't see.
@@ -561,7 +561,7 @@ save_schedule_to_json(schedule, "schedule.json")
 ---
 
 ### load_schedule_from_json
-Load a `Schedule` previously saved with `save_schedule_to_json` — the
+Load a `Schedule` previously saved with `save_schedule_to_json` - the
 round-trip is lossless, including per-operation `start_time`/`end_time`/
 `operation_index`/etc.
 
@@ -576,7 +576,7 @@ from lekinpy.io import load_schedule_from_json
 schedule = load_schedule_from_json("schedule.json")
 schedule.display_summary(system)  # works even though `system`'s jobs were
                                    # never run through an algorithm in this
-                                   # process — display methods read timing
+                                   # process - display methods read timing
                                    # from the Schedule itself, not from Job
 ```
 
@@ -621,7 +621,7 @@ per `Schedule:` block, each shaped so it can be passed straight to
 
 Each machine's `Oper:` line can be in either of two formats:
 - **This library's extended format** (written by `save_schedule_to_seq`):
-  `job_id;operation_index;start_time;end_time;sequence_position;status` —
+  `job_id;operation_index;start_time;end_time;sequence_position;status` -
   parses into a full `ScheduledOperation`-compatible dict.
 - **Original LEKIN format**: a bare job id (e.g. `J01`), with no other
   fields. Still parses without error; `operation_index`/`start_time`/
@@ -716,7 +716,7 @@ export_system_to_json(system, "system.json")
 Base class providing common utilities for building scheduling algorithms:
 mapping machines to workcenters, tracking machine availability, and
 producing `MachineSchedule` lists. It's also the extension point for
-adding new algorithms — see [Authoring Custom
+adding new algorithms - see [Authoring Custom
 Algorithms](#authoring-custom-algorithms).
 
 All four built-in algorithms correctly schedule **every operation of every
@@ -736,7 +736,7 @@ Raises `NotImplementedError` if the subclass didn't set a complete
 `metadata` class attribute (see below).
 
 **Class Attribute**
-- `metadata: dict` — every subclass must set this to a dict with four keys:
+- `metadata: dict` - every subclass must set this to a dict with four keys:
   `id` (short unique string), `display_name` (human-readable name),
   `supports_multi_operation` (bool), and `version` (string). Checked at
   instantiation time.
@@ -754,12 +754,12 @@ Raises `NotImplementedError` if the subclass didn't set a complete
   Generic engine that advances time, discovers available jobs, chooses one
   via `job_selector_fn`, then schedules **every operation of that job, in
   order**, on the earliest-available eligible machine for each operation's
-  workcenter — the same pattern `FCFSAlgorithm` uses. Continues until all
+  workcenter - the same pattern `FCFSAlgorithm` uses. Continues until all
   jobs are scheduled.
   **Returns**: `(total_time, machines)` where `machines` is a list of
   `MachineSchedule`.
   > **Note on interleaving:** once a job is selected, all of its
-  > operations run back-to-back before the next dispatch decision — a job
+  > operations run back-to-back before the next dispatch decision - a job
   > "monopolizes" the machines it needs until finished, even if a
   > higher-priority job is released partway through. This is a
   > deliberate simplification (matching `FCFSAlgorithm`'s structure)
@@ -767,7 +767,7 @@ Raises `NotImplementedError` if the subclass didn't set a complete
   > Worth knowing if you're comparing makespans against a textbook
   > job-shop solver.
 
-**Minimal Example — authoring a custom rule**
+**Minimal Example - authoring a custom rule**
 ```python
 from lekinpy.algorithms.base import SchedulingAlgorithm
 from lekinpy.schedule import Schedule
@@ -871,7 +871,7 @@ sched.display_machine_details()
 
 You can plug in your own rule by subclassing `SchedulingAlgorithm`:
 implement `schedule(self, system) -> Schedule`, and set a `metadata` class
-attribute (see [SchedulingAlgorithm](#schedulingalgorithm-base)) — that's
+attribute (see [SchedulingAlgorithm](#schedulingalgorithm-base)) - that's
 the whole contract, no decorators or entry-point registration needed. Use
 the built‑in `dynamic_schedule(...)` helper, which already handles
 multi-operation jobs correctly, or implement your own loop.
@@ -927,15 +927,15 @@ schedule.display_summary(sys)
 `dynamic_schedule` (and `FCFSAlgorithm`'s own loop) already schedule
 **every** operation of a job once that job is selected, respecting
 precedence automatically. There's nothing extra you need to do for a
-`job_selector_fn`-based algorithm to support multi-operation jobs — set
+`job_selector_fn`-based algorithm to support multi-operation jobs - set
 `"supports_multi_operation": True` in your `metadata` and it just works.
 
 One tradeoff to know about: once `dynamic_schedule` selects a job, all of
-its operations run back-to-back before the next dispatch decision — a job
+its operations run back-to-back before the next dispatch decision - a job
 "monopolizes" the machines it needs until finished, even if a
 higher-priority job is released partway through. If you need full
 operation-level interleaving across jobs (a newly-released job's operation
-preempting another job's routing mid-way), don't use `dynamic_schedule` —
+preempting another job's routing mid-way), don't use `dynamic_schedule` -
 write your own loop that tracks per-job "next ready operation" instead of
 whole-job availability.
 
@@ -945,7 +945,7 @@ If you publish your rule inside `lekinpy/algorithms/`, export it via `lekinpy/al
 from lekinpy.algorithms import MyRule
 ```
 
-### Data IO Patterns — Three Ways to Load & Save
+### Data IO Patterns - Three Ways to Load & Save
 
 This example uses **FCFS** on a single‑machine system, but focuses on showing different import methods for jobs/workcenters and exporting schedules/system data.
 
@@ -1007,4 +1007,4 @@ export_system_to_json(system1, "system.json")
 - The `.job` / `.mch` text formats are LEKIN‑style files parsed by `parse_job_file` / `parse_mch_file`.
 - Building in Python is the most flexible for generating programmatic test cases.
 - JSON import/export is ideal for saving system snapshots for later runs.
-- `save_schedule_to_json`/`load_schedule_from_json` (and `save_schedule_to_seq`/`parse_seq_file`) round-trip a *computed* `Schedule` losslessly, including every operation's real start/end times — separate from `export_system_to_json`, which only saves job/workcenter definitions, not a schedule.
+- `save_schedule_to_json`/`load_schedule_from_json` (and `save_schedule_to_seq`/`parse_seq_file`) round-trip a *computed* `Schedule` losslessly, including every operation's real start/end times - separate from `export_system_to_json`, which only saves job/workcenter definitions, not a schedule.

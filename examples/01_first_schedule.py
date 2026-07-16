@@ -35,15 +35,11 @@ system.add_job(
 )
 
 schedule = FCFSAlgorithm().schedule(system)
+system.set_schedule(schedule)
 
-print(f"Algorithm: {schedule.schedule_type}")
-print(f"Makespan: {schedule.time}")
-
-for machine_schedule in schedule.machines:
-    print(f"\nMachine {machine_schedule.machine}")
-    for operation in machine_schedule.operations:
-        print(
-            f"  {operation.job_id}: "
-            f"start={operation.start_time}, end={operation.end_time}"
-        )
-
+# Use the built-in human-readable reports for console output. Use
+# schedule.to_dict() only when you need structured data for serialization.
+schedule.display_machine_details()
+schedule.display_job_details(system)
+schedule.display_sequence(system)
+schedule.display_summary(system)

@@ -2,7 +2,7 @@
 Expose the main classes and functions at the package root for convenient imports.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .job import Job, Operation
 from .machine import Machine, Workcenter

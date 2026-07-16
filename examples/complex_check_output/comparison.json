@@ -1,0 +1,30 @@
+[
+  {
+    "algorithm": "First-Come, First-Served",
+    "makespan": 43.0,
+    "operations": 23,
+    "json": "complex_check_output/fcfs_schedule.json",
+    "gantt": "complex_check_output/fcfs_gantt.png"
+  },
+  {
+    "algorithm": "Shortest Processing Time",
+    "makespan": 43.0,
+    "operations": 23,
+    "json": "complex_check_output/spt_schedule.json",
+    "gantt": "complex_check_output/spt_gantt.png"
+  },
+  {
+    "algorithm": "Earliest Due Date",
+    "makespan": 45.0,
+    "operations": 23,
+    "json": "complex_check_output/edd_schedule.json",
+    "gantt": "complex_check_output/edd_gantt.png"
+  },
+  {
+    "algorithm": "Weighted Shortest Processing Time",
+    "makespan": 43.0,
+    "operations": 23,
+    "json": "complex_check_output/wspt_schedule.json",
+    "gantt": "complex_check_output/wspt_gantt.png"
+  }
+]

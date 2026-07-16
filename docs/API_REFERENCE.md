@@ -5,8 +5,7 @@ Main reference for the lekinpy library (v0.1.0).
 Use this as both developer documentation and student learning material.
 -->
 
-- Install: `pip install lekinpy`
-- Optional plotting: `pip install lekinpy[plot]`
+- Install: `pip install lekinpy` (includes `matplotlib` for `plot_gantt_chart`)
 
 ## Table of Contents
   - [Core Entities](#core-entities)

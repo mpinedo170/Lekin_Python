@@ -21,15 +21,11 @@ classifiers = [
   "Operating System :: OS Independent",
   "Topic :: Scientific/Engineering :: Mathematics"
 ]
-# Only true runtime dependencies (keep core lightweight)
 dependencies = [
   "numpy>=1.24",
-  "pandas>=2.0"
+  "pandas>=2.0",
+  "matplotlib>=3.8"
 ]
-
-[project.optional-dependencies]
-# Users who want plotting can opt-in instead of pulling matplotlib for everyone.
-plot = ["matplotlib>=3.8"]
 
 [project.urls]
 Homepage = "https://github.com/Ruturaj-Vasant/Lekin_Python"

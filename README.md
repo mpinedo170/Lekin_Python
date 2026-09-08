@@ -16,7 +16,7 @@ pip install .
 ## Features
 - Parse and write `.job`, `.mch`, `.seq`, and `.json` files
 - Add jobs and machines programmatically or via files
-- Run scheduling algorithms (FCFS, SPT, EDD, WSPT)
+- Run scheduling algorithms (FCFS, SPT, EDD, WSPT, and Johnson's rule for flow shops)
 - Output schedules in LEKIN-compatible or JSON format
 - Plot Gantt charts (requires `matplotlib`)
 
@@ -59,7 +59,7 @@ schedule.plot_gantt_chart(system)
 📚 **Full API Reference:** [docs/API_REFERENCE.md](docs/API_REFERENCE.md)
 
 - `System`, `Job`, `Operation`, `Machine`, `Workcenter`
-- Algorithms: `FCFSAlgorithm`, `SPTAlgorithm`, `EDDAlgorithm`, `WSPTAlgorithm`
+- Algorithms: `FCFSAlgorithm`, `SPTAlgorithm`, `EDDAlgorithm`, `WSPTAlgorithm`, `JohnsonAlgorithm`
 - IO: `export_jobs_to_jobfile`, `export_workcenters_to_mchfile`, etc.
 
 ## Contributing

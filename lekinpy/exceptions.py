@@ -40,3 +40,18 @@ class DuplicateWorkcenterIdError(LekinValidationError):
 
 class MissingWorkcenterError(LekinValidationError):
     """Raised when a Job operation references a workcenter the System doesn't have."""
+
+
+class NotAFlowShopError(LekinValidationError):
+    """Raised when an algorithm that requires a flow shop is given a System that isn't one.
+
+    Unlike the errors above, this is not a complaint about the data being
+    malformed -- a System that trips this is perfectly valid, it just isn't
+    the *shape* the algorithm is defined for. JohnsonAlgorithm raises it when
+    the jobs don't all follow one identical machine route, or when a stage on
+    that route has anything other than exactly one machine.
+
+    It subclasses LekinValidationError so callers that already funnel
+    lekinpy's validation errors into a "this problem can't be scheduled that
+    way" channel (as lekin-web does) pick it up without new plumbing.
+    """

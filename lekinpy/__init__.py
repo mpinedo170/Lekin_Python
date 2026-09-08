@@ -2,7 +2,7 @@
 Expose the main classes and functions at the package root for convenient imports.
 """
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 from .job import Job, Operation
 from .machine import Machine, Workcenter
@@ -17,6 +17,7 @@ from .exceptions import (
     DuplicateMachineIdError,
     DuplicateWorkcenterIdError,
     MissingWorkcenterError,
+    NotAFlowShopError,
 )
 from .io import (
     export_jobs_to_jobfile,
@@ -37,6 +38,8 @@ from .algorithms import (
     SPTAlgorithm,
     EDDAlgorithm,
     WSPTAlgorithm,
+    JohnsonAlgorithm,
+    johnson_order,
 )
 
 __all__ = [
@@ -58,6 +61,7 @@ __all__ = [
     "DuplicateMachineIdError",
     "DuplicateWorkcenterIdError",
     "MissingWorkcenterError",
+    "NotAFlowShopError",
     # IO helpers
     "export_jobs_to_jobfile",
     "export_workcenters_to_mchfile",
@@ -76,6 +80,8 @@ __all__ = [
     "SPTAlgorithm",
     "EDDAlgorithm",
     "WSPTAlgorithm",
+    "JohnsonAlgorithm",
+    "johnson_order",
     # Metadata
     "__version__",
 ]

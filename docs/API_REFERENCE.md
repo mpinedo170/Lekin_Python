@@ -36,6 +36,7 @@ Use this as both developer documentation and student learning material.
     - [SPTAlgorithm](#sptalgorithm)
     - [EDDAlgorithm](#eddalgorithm)
     - [WSPTAlgorithm](#wsptalgorithm)
+    - [JohnsonAlgorithm](#johnsonalgorithm)
   - [Authoring Custom Algorithms](#authoring-custom-algorithms)
   - [End‑to‑End Examples](#end-to-end-examples)
 
@@ -477,6 +478,14 @@ when objects are added to it, or by `System.validate()`.
 | `DuplicateJobIdError` | `System.add_job(...)`, `System.validate()` | a job with that `job_id` is already in the system |
 | `DuplicateWorkcenterIdError` | `System.add_workcenter(...)`, `System.validate()` | a workcenter with that `name` is already in the system |
 | `MissingWorkcenterError` | `System.validate()` (also called automatically by every `SchedulingAlgorithm` before scheduling) | an operation's `workcenter` string doesn't match any workcenter in the system |
+| `NotAFlowShopError` | `JohnsonAlgorithm.flow_shop_route(...)`, `.sequence(...)`, `.schedule(...)` | the system isn't a flow shop: jobs don't all follow one identical route, the route is shorter than two stages or revisits a workcenter, or a stage has more than one machine |
+
+`NotAFlowShopError` is the odd one out: it isn't a complaint about
+malformed data. A system that trips it is perfectly valid, it just isn't
+the *shape* the chosen algorithm is defined for. It still subclasses
+`LekinValidationError`, so callers that already funnel lekinpy's
+validation errors into a "this problem can't be scheduled that way"
+channel pick it up without new plumbing.
 
 `System.validate()` re-checks all of the above from scratch, not just
 workcenter references - it's the final gate before scheduling, and
@@ -864,6 +873,78 @@ from lekinpy.algorithms import WSPTAlgorithm
 sched = WSPTAlgorithm().schedule(system)
 sched.display_machine_details()
 ```
+
+---
+
+### JohnsonAlgorithm
+Johnson's rule (SPT(1)-LPT(2)) for the flow shop makespan problem. On a
+**two-machine flow shop this is optimal, not a heuristic**: it provably
+minimizes the makespan.
+
+Unlike the four rules above it is **not a dispatching rule**. Those pick the
+next job from whatever happens to be available at some instant; Johnson's
+rule needs every job's processing times up front, partitions the jobs once,
+and emits a single permutation that both machines follow. It therefore does
+not go through `dynamic_schedule()`.
+
+The rule: split jobs into set A (first-stage time `<=` second-stage time)
+and set B (the rest); sort A ascending by first-stage time, sort B
+descending by second-stage time; run A then B. Ties keep input order, so
+the emitted sequence is deterministic.
+
+**Metadata**: `id="johnson"`, `supports_multi_operation=True`, `version="1.0.0"`
+
+**Requires a flow shop.** Every job must visit the same workcenters in the
+same order, the route must have at least two distinct stages, and each stage
+must have exactly one machine. Anything else raises `NotAFlowShopError`.
+
+**Optimality holds only when** there are exactly two stages, one machine per
+stage, and every job is released at time 0. Release times are still honored
+when building the schedule -- a job released late starts late -- but the
+proof no longer applies. Use `is_optimal_for(system)` to test all three
+conditions at once.
+
+**Flow shops with more than two stages.** `Fm || Cmax` is NP-hard for m >= 3,
+so there is no exact extension. By default such a system is still accepted
+and the standard two-machine reduction is applied (proxy first-stage time
+`sum(p[1..m-1])`, proxy second-stage time `sum(p[2..m])`). That is a
+heuristic with no optimality guarantee, and the result says so: the returned
+`Schedule.schedule_type` is `"Johnson (m-machine heuristic)"` rather than
+`"Johnson"`. Pass `allow_multi_stage=False` to reject anything but a genuine
+two-machine flow shop.
+
+**Signature**
+```python
+JohnsonAlgorithm(allow_multi_stage: bool = True)
+
+.schedule(system: System) -> Schedule
+.sequence(system: System) -> List[Job]      # Johnson order, without scheduling
+.flow_shop_route(system: System) -> Tuple[str, ...]   # raises NotAFlowShopError
+.is_optimal_for(system: System) -> bool     # predicate; never raises
+```
+
+**Example**
+```python
+from lekinpy.algorithms import JohnsonAlgorithm
+
+algorithm = JohnsonAlgorithm()
+
+# Inspect the sequence before committing to a schedule.
+print([job.job_id for job in algorithm.sequence(system)])
+
+sched = algorithm.schedule(system)
+print(sched.schedule_type)  # "Johnson" -- or "Johnson (m-machine heuristic)"
+
+if algorithm.is_optimal_for(system):
+    print(f"Makespan {sched.time} is provably minimal")
+else:
+    print(f"Makespan {sched.time} is good, but not provably minimal here")
+```
+
+Also exported is `johnson_order(items)`, the bare rule over
+`(item, first_stage_time, second_stage_time)` triples, with nothing
+scheduling-specific attached -- useful for applying the ordering to
+something that isn't a `System`.
 
 ---
 

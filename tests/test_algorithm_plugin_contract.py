@@ -1,7 +1,18 @@
-from lekinpy.algorithms import SchedulingAlgorithm, FCFSAlgorithm, SPTAlgorithm, EDDAlgorithm, WSPTAlgorithm
+from lekinpy.algorithms import (
+    SchedulingAlgorithm,
+    FCFSAlgorithm,
+    SPTAlgorithm,
+    EDDAlgorithm,
+    WSPTAlgorithm,
+    JohnsonAlgorithm,
+)
 import pytest
 
-ALL_ALGORITHMS = [FCFSAlgorithm, SPTAlgorithm, EDDAlgorithm, WSPTAlgorithm]
+# JohnsonAlgorithm belongs here even though it is not a dispatching rule:
+# the contract these tests enforce is about metadata and instantiation, which
+# it must satisfy like any other subclass. Nothing below calls schedule(),
+# which is what lets a flow-shop-only algorithm sit in the same list.
+ALL_ALGORITHMS = [FCFSAlgorithm, SPTAlgorithm, EDDAlgorithm, WSPTAlgorithm, JohnsonAlgorithm]
 REQUIRED_METADATA_KEYS = {"id", "display_name", "supports_multi_operation", "version"}
 
 
